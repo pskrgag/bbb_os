@@ -1,18 +1,13 @@
 #ifndef __OLAF_H__
 #define __OLAF_H__
 
-#include <bone/olaf_commands.h>
+#include <stdint.h>
+#include <bone/olaf_api.h>
 
-/* This header file provides olaf commands */
+/* NAME: olaf_call
+ * 	Simple wrapper on send() + recv() functions
+ * 	Basic function for communicating with olaf
+ */
+extern uint64_t olaf_call(sock_t socket, olaf_code_t code, void *args, size_t arg_size);
 
-#define OLAF_MAX_LOGIN_NAME		50
-#define OLAF_MAX_LOGIN_PASSWD		100
-
-struct olaf_login_args {
-	char name[OLAF_MAX_LOGIN_NAME];
-	char passwd[OLAF_MAX_LOGIN_PASSWD];
-} __packed;
-
-#define OLAF_LOGIN	OLAF_TYPE_COMMAND(0, struct olaf_login_args)
-
-#endif
+#endif /* __OLAF_H__ */

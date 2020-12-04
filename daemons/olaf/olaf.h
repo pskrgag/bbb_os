@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <endian.h>
+#include <netinet/tcp.h>
 
 typedef int sock_t;
 
@@ -42,6 +43,7 @@ static inline olaf_code_t olaf_get_code(sock_t sock)
 
 static inline int __check_login(const struct olaf_login_args *args, const char *pass)
 {
+	/* TODO: make hash check */
 	return !strcmp(args->passwd, pass);
 }
 
@@ -75,4 +77,37 @@ static inline int olaf_check_login(const struct olaf_login_args *args)
 	return 0;
 }
 
-#endif
+static inline int olaf_enable_keep_alive(sock_t sock)
+{
+	const static int yes = 1, idle = 1, interval = 1, maxpkt = 10;
+	int res;
+
+	res = setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
+	if (res)
+		goto err;
+
+	res = setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, &idle, sizeof(idle));
+	if (res)
+		goto err;
+
+	res = setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &interval, sizeof(interval));
+	if (res)
+		goto err;
+
+	res = setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &maxpkt, sizeof(maxpkt));
+	if (res)
+		goto err;
+
+	return 0;
+
+err:
+	return -1;
+}
+
+static inline int olaf_check_handshake(sock_t sock)
+{
+	/* TODO: add handshake check */
+	return 0;
+}
+
+#endif /* __OLAF_PRIVATE_H */

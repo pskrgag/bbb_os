@@ -18,7 +18,7 @@ typedef uint64_t olaf_code_t;
  * |        |        |        |         |        |        |       |         |
  * |        |        |        |         |        |        |       |         |
  * +--------+--------+--------+---------+--------+--------+-------+---------+
- * |	not used for now      |		arg size	          |   id    |
+ * |	not used for now      |		      arg size	          |   id    |
  */
 
 /* Defines new command */
@@ -26,4 +26,5 @@ typedef uint64_t olaf_code_t;
 #define OLAF_TYPE_COMMAND(id, type)	OLAF_COMMAND(id, sizeof(type))
 #define OLAF_COMMAND_SIZE(command)	(command >> 8)
 
-#endif
+#define OLAF_WRONG_CODE			(~0ull)
+#endif /* __OLAF_COMMANDS_H__ */
