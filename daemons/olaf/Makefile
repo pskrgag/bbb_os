@@ -1,5 +1,5 @@
 TOPDIR=../..
-CC = arm-linux-gnueabihf-gcc
+
 CFLAGS += -I $(TOPDIR)/include
 LFLAGS += -lpthread
 
@@ -10,10 +10,19 @@ endif
 SRCS = $(wildcard *.c)
 OUT = $(patsubst %.c,%,$(SRCS))
 
-all: $(OUT)
+OLAF_DIR = $(DAEMONS_DIR)/olaf
+
+all: $(OLAF_DIR) $(OUT)
 %: %.c
-	$(CC) -o $@ $^ $(CFLAGS) $(LFLAGS)
+	@echo $(CC)
+	$(CC) -o $(OLAF_DIR)/$@ $^ $(CFLAGS) $(LFLAGS)
+
+$(OLAF_DIR):
+	mkdir -p $(OLAF_DIR)
+
 
 .PHONY: clean
 clean:
 	rm ${TARGETS}
+
+include $(TOPDIR)/Makefile.variables

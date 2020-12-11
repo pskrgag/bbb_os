@@ -1,0 +1,3 @@
+CC = arm-linux-gnueabihf-gcc
+CXX_HOST = g++
+CC_HOST = gcc

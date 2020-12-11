@@ -10,39 +10,29 @@
 #include <bone/olaf_api.h>
 #include "olaf.h"
 
-static int olaf_login(sock_t socket)
-{
-	uint8_t login_attemts = 0; /* only 3 login attemps allowed */
-	int res;
-	struct olaf_login_args args;
-	olaf_code_t code;
-
-	code = olaf_get_code(socket);
-	if (code != OLAF_LOGIN)
-		return -1;
-
-	res = recv(socket, &args, sizeof(args), 0);
-	if (res != sizeof(args)) {
-		log_err("Errno = %s\n", strerror(errno));
-		return -1;
-	}
-
-	return olaf_check_login(&args);
-}
-
 static void *__attribute__((noreturn)) user_main(void *data)
 {
 	sock_t socket = (sock_t) data;
 	olaf_code_t code;
 	int is_logged = 0;
 
-	/* login routine */
-	/* user must login first, if he can't login, so close the connection */
-	is_logged = olaf_login(socket);
-	if (is_logged <= 0)
+	code = olaf_get_code(socket);
+	if (code != OLAF_LOGIN)
 		goto error;
 
-	DBG("Logged!!!\n");
+	/* only these commands can be first commands send by user */
+	switch (code) {
+	case OLAF_LOGIN:
+		is_logged = olaf_login(socket);
+		if (!is_logged)
+			goto error;
+
+		break;
+	case OLAF_GET_DEVICE_INFO:
+		break;
+		
+	}
+
 	while (1) {
 		code = olaf_get_code(socket);
 		if (code == OLAF_WRONG_CODE)		/* no need to talk with broken connection */
