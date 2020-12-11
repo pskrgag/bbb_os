@@ -9,8 +9,6 @@
 #include <endian.h>
 #include <netinet/tcp.h>
 
-typedef int sock_t;
-
 /* Constants */
 #define DEFAULT_PORT		1234
 #define IP			"192.168.7.2"
@@ -108,6 +106,22 @@ static inline int olaf_check_handshake(sock_t sock)
 {
 	/* TODO: add handshake check */
 	return 0;
+}
+
+
+static int olaf_login(sock_t socket)
+{
+	int res;
+	struct olaf_login_args args;
+	olaf_code_t code;
+
+	res = recv(socket, &args, sizeof(args), 0);
+	if (res != sizeof(args)) {
+		log_err("Errno = %s\n", strerror(errno));
+		return -1;
+	}
+
+	return olaf_check_login(&args);
 }
 
 #endif /* __OLAF_PRIVATE_H */

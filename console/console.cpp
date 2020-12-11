@@ -1,4 +1,14 @@
-int main(void)
+#include <QApplication>
+#include <QTextEdit>
+#include <QSplitter>
+
+#include "mainwindow.hpp"
+
+int main(int argc, char **argv)
 {
-	return 0;
+	QApplication app(argc, argv);
+	Gui::MainWindow window;
+
+	window.show();
+	return app.exec();
 }

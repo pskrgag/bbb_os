@@ -1,5 +1,5 @@
-#ifndef __OLAF_H__
-#define __OLAF_H__
+#ifndef __OLAF_API_H__
+#define __OLAF_API_H__
 
 #include <stdint.h>
 #include <bone/olaf_api.h>
@@ -8,6 +8,6 @@
  * 	Simple wrapper on send() + recv() functions
  * 	Basic function for communicating with olaf
  */
-extern uint64_t olaf_call(sock_t socket, olaf_code_t code, void *args, size_t arg_size);
+extern ssize_t olaf_call(sock_t socket, olaf_code_t code, void *args);
 
-#endif /* __OLAF_H__ */
+#endif /* __OLAF_API_H__ */
