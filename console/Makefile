@@ -10,7 +10,7 @@ link:
 
 compile: $(CONSOLE_DIR)
 	@echo "CMAKE 	console"
-	cmake -quiet -D CMAKE_CXX_COMPILER=$(CXX_HOST) -S . -B $(CONSOLE_DIR) 1>2 /dev/null
+	LD_LIBRARY_PATH=$(CONSOLE_DIR)/../libs cmake -DCMAKE_CXX_COMPILER=$(CXX_HOST) -S . -B $(CONSOLE_DIR) >/dev/null 2>&1
 
 $(CONSOLE_DIR):
 	mkdir -p $@
