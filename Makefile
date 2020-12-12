@@ -1,14 +1,17 @@
 # For building user should define O varible
 
-SUBDIRS := $(wildcard */.)
+include Makefile.variables
+
+SUBDIRS = $(filter-out include/., $(wildcard */.))
 
 BUILD_DIR=$(O)/build
 
-all: $(BUILD_DIR) $(SUBDIRS)
-$(SUBDIRS):
-	$(MAKE) -C $@ BUILD_DIR=$(BUILD_DIR)
+all: $(CMDS)
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+$(CMDS):
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir $@ BUILD_DIR=$(BUILD_DIR); \
+	done
 
-.PHONY: all $(SUBDIRS)
+.PHONY: $(CMDS)
+.SILENT: $(CMDS)

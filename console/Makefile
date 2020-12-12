@@ -5,17 +5,14 @@ LFLAGS += -lstdc++
 CONSOLE_DIR=$(BUILD_DIR)/console
 SRCS = $(wildcard *.cpp)
 
-all: $(CONSOLE _DIR) console
+link:
+	$(MAKE) --silent -C $(CONSOLE_DIR)
 
-.PHONY: console build all
-
-console: build
-	make -C $(CONSOLE_DIR)
-
-build:
-	cmake -D CMAKE_CXX_COMPILER=$(CXX_HOST) -S . -B $(CONSOLE_DIR)
+compile: $(CONSOLE_DIR)
+	@echo "CMAKE 	console"
+	cmake -quiet -D CMAKE_CXX_COMPILER=$(CXX_HOST) -S . -B $(CONSOLE_DIR) 1>2 /dev/null
 
 $(CONSOLE_DIR):
-	mdkir -p $(CONSOLE_DIR)
+	mkdir -p $@
 
 include $(TOPDIR)/Makefile.variables
