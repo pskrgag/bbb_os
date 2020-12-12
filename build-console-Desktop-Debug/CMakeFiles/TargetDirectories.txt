@@ -1,4 +1,0 @@
-/home/pskrgag/Documents/bbb_workspace/bbb_os/build-console-Desktop-Debug/CMakeFiles/rebuild_cache.dir
-/home/pskrgag/Documents/bbb_workspace/bbb_os/build-console-Desktop-Debug/CMakeFiles/edit_cache.dir
-/home/pskrgag/Documents/bbb_workspace/bbb_os/build-console-Desktop-Debug/CMakeFiles/console.dir
-/home/pskrgag/Documents/bbb_workspace/bbb_os/build-console-Desktop-Debug/CMakeFiles/console_autogen.dir
