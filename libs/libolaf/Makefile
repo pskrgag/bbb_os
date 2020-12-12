@@ -5,9 +5,11 @@ CFLAGS += -I $(TOPDIR)/include
 SRCS = $(wildcard *.c)
 OUT = libolaf.so
 
-all: $(OUT)
+compile:
+	@echo "LD 	$(LIBS_DIR)/$(OUT)"
+	$(CC_HOST) $(CFLAGS) -shared -o $(LIBS_DIR)/$(OUT) $(SRCS)
 
-$(OUT):
-	$(CC_HOST) $(CFLAGS) -shared -o $(LIBS_DIR)/$@ $(SRCS)
+link:
+
 
 include $(TOPDIR)/Makefile.variables

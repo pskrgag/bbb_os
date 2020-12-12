@@ -1,12 +1,14 @@
+TOPDIR=../
+
+include $(TOPDIR)/Makefile.variables
+
 SUBDIRS := $(wildcard */.)
 
 DAEMONS_DIR=$(BUILD_DIR)/daemons
 
-all: $(DAEMONS_DIR) $(SUBDIRS)
-$(SUBDIRS):
-	$(MAKE) -C $@ DAEMONS_DIR=$(DAEMONS_DIR)
-
-$(DAEMONS_DIR):
-	mkdir -p $(DAEMONS_DIR)
+$(CMDS):
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir $@ DAEMONS_DIR=$(DAEMONS_DIR); \
+	done
 
 .PHONY: all $(SUBDIRS)
