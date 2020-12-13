@@ -10,6 +10,8 @@
 #include <new>		/* std::bad_alloc */
 #include <algorithm>
 
+#include "debug.hpp"
+
 namespace Ui {
 class MainWindow;
 } /* Ui namspace */

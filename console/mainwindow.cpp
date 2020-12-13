@@ -23,10 +23,16 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	horizontal_splitter->addWidget(avail_devices);
 	horizontal_splitter->addWidget(vertical_splitter);
 
+	{
+		int min,max;
+
+		horizontal_splitter->getRange(0, &min,&max);
+		DEBUG_LOG << min << max;
+	}
 	vertical_splitter->addWidget(device_state);
 	vertical_splitter->addWidget(console_logger);
 
-	horizontal_splitter->setSizes(QList<int>() << 50 << 200);
+	horizontal_splitter->setSizes(QList<int>() << 50 << 300);
 	vertical_splitter->setSizes(QList<int>() << 200 << 50);
 
 	setCentralWidget(horizontal_splitter);

@@ -1,13 +1,15 @@
 #ifndef OLAFCLIENT_H
 #define OLAFCLIENT_H
 
+#include <QTcpSocket>
+
 namespace Net{
 
 class OlafClient
 {
-	int socket;
+	QTcpSocket socket;
 public:
-	OlafClient();
+	explicit OlafClient();
 };
 
 } /* namespace Net */
