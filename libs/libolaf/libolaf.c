@@ -1,7 +1,8 @@
 #include <sys/socket.h>
+#include <endian.h>
+#include <errno.h>
 
 #include <bone/olaf.h>
-
 
 /* Helper functions to communicate with olaf daemon */
 
@@ -10,10 +11,10 @@ static ssize_t olaf_send(sock_t socket, olaf_code_t code, const void *arg)
 	int res;
 	struct olaf_request req;
 
-	req.code = code;
+	req.code = htobe64(code);
 
 	res = send(socket, &req, sizeof(req), 0);
-	if (res != sizeof(code))
+	if (res != sizeof(req))
 		return -1;
 
 	if (OLAF_COMMAND_PERMS(code) & OLAF_WRITE) {
@@ -32,12 +33,14 @@ static ssize_t olaf_recv(sock_t socket, void *arg)
 
 	res = recv(socket, &req, sizeof(req), 0);
 	if (res != sizeof(req))
-		return -1;
+		return -errno;
+
+	req.code = be64toh(req.code);
 
 	if (OLAF_COMMAND_PERMS(req.code) & OLAF_READ) {
 		res = recv(socket, arg, OLAF_COMMAND_ARGS_SIZE(req.code), 0);
 		if (res != OLAF_COMMAND_ARGS_SIZE(req.code))
-			return -1;
+			return -3;
 	}
 
 	return 0;
@@ -53,7 +56,7 @@ ssize_t olaf_call(sock_t socket, olaf_code_t code, void *arg)
 
 	res = olaf_recv(socket, arg);
 	if (res)
-		return -1;
+		return res;
 
 	return 0;
 }

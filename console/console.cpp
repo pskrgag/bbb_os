@@ -3,6 +3,7 @@
 #include <QSplitter>
 
 #include "mainwindow.hpp"
+#include "olafclient.h"
 
 int main(int argc, char **argv)
 {

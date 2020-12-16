@@ -5,6 +5,7 @@
 
 Gui::MainWindow::MainWindow(QWidget *parent):
 	QMainWindow(parent),
+	pinger(new Net::OlafClient),
 	ui(new Ui::MainWindow),
 	horizontal_splitter(new QSplitter(Qt::Horizontal)),
 	vertical_splitter(new QSplitter(Qt::Vertical)),
@@ -12,8 +13,13 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	device_state(new QWidget(this)),
 	console_logger(new QTextEdit(this))
 {
-	if (!horizontal_splitter || !avail_devices || !device_state || !console_logger)
-		throw std::bad_alloc();
+	/* Connect pinger to MainWindow */
+	connect(pinger, &Net::OlafClient::found_device, this, &Gui::MainWindow::new_device_found);
+	pinger->moveToThread(&pinger_thread);
+
+	/* Start ping routine */
+	connect(&pinger_thread, &QThread::started, pinger, &Net::OlafClient::ping);
+	pinger_thread.start();
 
 	/* widgets set up */
 	console_logger->setReadOnly(true);
@@ -29,6 +35,7 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 		horizontal_splitter->getRange(0, &min,&max);
 		DEBUG_LOG << min << max;
 	}
+
 	vertical_splitter->addWidget(device_state);
 	vertical_splitter->addWidget(console_logger);
 
@@ -37,6 +44,8 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 
 	setCentralWidget(horizontal_splitter);
 	ui->setupUi(this);
+
+	DEBUG_LOG << "Running...";
 }
 
 Gui::MainWindow::~MainWindow()
@@ -67,4 +76,9 @@ void Gui::MainWindow::remove_device(QListWidgetItem *item)
 
 	device_list.erase(item_iter);
 	avail_devices->removeItemWidget((*item_iter).data());
+}
+
+void Gui::MainWindow::new_device_found(const QString &name, const QString &ip)
+{
+	add_device(new QListWidgetItem(QIcon(IMG_PATH), name + ":" + ip));
 }

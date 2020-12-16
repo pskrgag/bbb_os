@@ -19,12 +19,10 @@ $(OLAF_DIR):
 
 link: $(OLAF_DIR)/$(OUT)
 
-$(OLAF_DIR)/$(OUT):
+$(OLAF_DIR)/$(OUT): $(OLAF_DIR)/$(OUT).o
 	@echo "LD	$@"
 	$(CC) $(OLAF_DIR)/$(OUT).o -o $(OLAF_DIR)/$(OUT) $(LFLAGS)
 
-
 .PHONY: clean
-
 
 include $(TOPDIR)/Makefile.variables
