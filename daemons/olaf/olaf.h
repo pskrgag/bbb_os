@@ -25,18 +25,20 @@
 #define DBG(...)
 #endif
 
-static inline olaf_code_t olaf_get_code(sock_t sock)
+static inline int olaf_get_request(sock_t sock, struct olaf_request *req)
 {
-	olaf_code_t code;
 	int res;
 
-	res = recv(sock, &code, sizeof(code), 0);
-	if (res != sizeof(code)) {
+	res = recv(sock, req, sizeof(*req), 0);
+	if (res != sizeof(*req)) {
 		log(LOG_ERR, "Failed to get code from user: %s\n", strerror(errno));
-		return (olaf_code_t) -1;
+		return -1;
 	}
 
-	return be64toh(code);
+	req->code = be64toh(req->code);
+	log_err("Got code = %llu. GET_NAME_CODE = %llu\n", req->code, OLAF_GET_DEVICE_INFO);
+
+	return 0;
 }
 
 static inline int __check_login(const struct olaf_login_args *args, const char *pass)
@@ -122,6 +124,71 @@ static int olaf_login(sock_t socket)
 	}
 
 	return olaf_check_login(&args);
+}
+
+static inline size_t olaf_get_name(sock_t socket, const struct olaf_request *req, struct olaf_device_info *info)
+{
+	memset(info, 0, sizeof(info));
+	strcpy(info->name, "BeagleBone Black");
+
+	return sizeof(struct olaf_device_info);
+}
+
+#define OLAF_PRE_ERROR		-1
+#define OLAF_LOGGED		0
+#define OLAF_GOT_NAME		1
+
+static inline int pre_connection(sock_t socket)
+{
+	struct olaf_request req;
+	int res;
+	void *ptr = NULL;
+	size_t size = 0;
+
+	res = olaf_get_request(socket, &req);
+	if (res || req.code == OLAF_WRONG_CODE)
+		goto error;
+
+	/* only these commands can be first commands send by user */
+	switch (req.code) {
+	case OLAF_LOGIN:
+		res = olaf_login(socket);
+		if (!res) {
+			res = OLAF_PRE_ERROR;
+			break;
+		}
+
+		return OLAF_LOGGED;
+	case OLAF_GET_DEVICE_INFO:
+		ptr = malloc(sizeof(struct olaf_device_info));
+
+		if (!ptr)
+			return OLAF_PRE_ERROR;
+
+		size = olaf_get_name(socket, &req, ptr);
+
+		res = OLAF_GOT_NAME;
+	}
+
+	req.code = htobe64(req.code);
+
+	res = send(socket, &req, sizeof(req), 0);
+	if (res != sizeof(req)) {
+		res = OLAF_PRE_ERROR;
+		goto error;
+	}
+
+	log_err("Sended Request\n");
+
+	res = send(socket, ptr, size, 0);
+	if (res != size)
+		res = OLAF_PRE_ERROR;
+
+	log_err("Sended args\n");
+
+error:
+	free(ptr);
+	return res;
 }
 
 #endif /* __OLAF_PRIVATE_H */

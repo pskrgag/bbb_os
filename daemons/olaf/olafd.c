@@ -14,31 +14,24 @@ static void *__attribute__((noreturn)) user_main(void *data)
 {
 	sock_t socket = (sock_t) data;
 	olaf_code_t code;
-	int is_logged = 0;
+	int res = 0;
 
-	code = olaf_get_code(socket);
-	if (code != OLAF_LOGIN)
+	res = pre_connection(socket);
+	switch (res)
+	{
+	case OLAF_LOGGED:
+		break;
+	
+	case OLAF_GOT_NAME:	/* it's not an error but, getting the name is last command for this connection */
+	case OLAF_PRE_ERROR:
 		goto error;
-
-	/* only these commands can be first commands send by user */
-	switch (code) {
-	case OLAF_LOGIN:
-		is_logged = olaf_login(socket);
-		if (!is_logged)
-			goto error;
-
-		break;
-	case OLAF_GET_DEVICE_INFO:
-		break;
-		
 	}
 
 	while (1) {
-		code = olaf_get_code(socket);
-		if (code == OLAF_WRONG_CODE)		/* no need to talk with broken connection */
-			goto error;
+		
 	}
 error:
+	log_err("Pre error\n");
 	close(socket);
 	pthread_exit(NULL);
 }
@@ -51,6 +44,8 @@ static void __attribute__((noreturn)) olaf_main(sock_t master)
 	int res;
 
 	while (1) {
+		log_err("Waiting for connection\n");
+
 		new_conn = accept(master, NULL, NULL);
 		if (new_conn < 0) {
 			log_err("Failed to accept new connection");
@@ -71,7 +66,7 @@ static void __attribute__((noreturn)) olaf_main(sock_t master)
 
 		pthread_create(&user_thread, NULL, user_main, (void *) new_conn);
 
-		DBG("Accepted new connection\n");
+		log_err("Accepted new connection\n");
 		continue;
 err:
 		close(new_conn);
