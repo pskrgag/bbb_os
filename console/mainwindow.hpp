@@ -7,6 +7,7 @@
 #include <QListWidget>
 #include <QSharedPointer>
 #include <QThread>
+#include <QHBoxLayout>
 
 #include <new>		/* std::bad_alloc */
 #include <algorithm>
@@ -14,13 +15,15 @@
 #include "debug.hpp"
 #include "olafclient.h"
 
-namespace Ui {
-class MainWindow;
-} /* Ui namspace */
-
 namespace Gui {
 
-class MainWindow : public QMainWindow
+enum EventLevels {
+	INFO,
+	WARNING,
+	ERROR,
+};
+
+class MainWindow : public QSplitter
 {
 	Q_OBJECT
 
@@ -28,19 +31,16 @@ public:
 	explicit MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
-	void add_device(QListWidgetItem *);
+	void add_new_event(const QString &info, Gui::EventLevels level);
 	void remove_device(QListWidgetItem *);
 private:
 	Net::OlafClient *pinger;
-	Ui::MainWindow *ui;
-	QSplitter *horizontal_splitter;
 	QSplitter *vertical_splitter;
 	QListWidget *avail_devices;
 	QWidget *device_state;
-	QTextEdit *console_logger;
-	QList<QSharedPointer<QListWidgetItem>> device_list;
+	QListWidget *console_logger;
 	QThread pinger_thread;
-
+	QMap<EventLevels, QString> icons_map;
 public slots:
 	void new_device_found(const QString &name, const QString &ip);
 };

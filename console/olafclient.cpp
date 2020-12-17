@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#define QT_DESTRIPTOR_TO_UNIX(fd)	static_cast<sock_t>(fd)
+
 Net::OlafClient::OlafClient():
 	socket(this),
 	to_ping(100)
@@ -31,8 +33,12 @@ void Net::OlafClient::ping()
 
 			socket.connectToHost(current_ip, BoarPort);
 
-			if (socket.waitForConnected(100)) {
+			if (socket.waitForConnected(30)) {
 				name = get_device_name();
+
+				if (name.size() == 0)
+					continue;
+
 				to_ping.remove(i);
 				found_device(name, current_ip);
 			}
@@ -46,11 +52,13 @@ QString Net::OlafClient::get_device_name()
 {
 	struct olaf_device_info info;
 	int res;
-	int fd = socket.socketDescriptor();
+	sock_t fd = QT_DESTRIPTOR_TO_UNIX(socket.socketDescriptor());
 
-	set_blocking(fd);
+	res = set_blocking(fd);
+	if (res < 0)
+		return {};
 
-	res = olaf_call(static_cast<sock_t>(fd), OLAF_GET_DEVICE_INFO, static_cast<void *>(&info));
+	res = olaf_call(fd, OLAF_GET_DEVICE_INFO, static_cast<void *>(&info));
 	if (res) {
 		DEBUG_LOG << "Failed to olaf_call" << QString::number(res);
 	}
@@ -60,9 +68,12 @@ QString Net::OlafClient::get_device_name()
 	return QString(info.name);
 }
 
-void Net::OlafClient::set_blocking(sock_t sock)
+int Net::OlafClient::set_blocking(sock_t sock)
 {
 	int flags = fcntl(sock, F_GETFL);
 
-	fcntl(sock, F_SETFL, flags & (~O_NONBLOCK));
+	if (flags < 0)
+		return flags;
+
+	return fcntl(sock, F_SETFL, flags & (~O_NONBLOCK));
 }
