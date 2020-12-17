@@ -10,6 +10,11 @@ static inline QString device_info_to_ip(const QString &info)
 	return ::strtok(nullptr, ":");
 }
 
+static inline QString device_info_to_name(const QString &info)
+{
+	return ::strtok(const_cast<char *>(info.toStdString().data()), ":");
+}
+
 Gui::MainWindow::MainWindow(QWidget *parent):
 	QSplitter(Qt::Horizontal, parent),
 	pinger(new Net::OlafClient),
@@ -71,15 +76,23 @@ void Gui::MainWindow::device_clicked(const QPoint &point)
 	QPoint globalPos = avail_devices->mapToGlobal(point);
 	QMenu device_menu;
 	QListWidgetItem *item = avail_devices->itemAt(point);
-	QAction *action;
+	QAction *a_connect, *a_disconnect;
+	QBrush state;
 
 	if (!item)
 		return;
 
-	action = device_menu.addAction("Connect");
-	action->setData(item->text());
+	a_connect = device_menu.addAction("Connect");
+	a_disconnect = device_menu.addAction("Disconnect");
 
-	connect(action, &QAction::triggered, this, [item, this](bool){
+	state = item->foreground();
+
+	if (state.color() == Qt::black)
+		a_disconnect->setEnabled(false);
+	else
+		a_connect->setEnabled(false);
+
+	connect(a_connect, &QAction::triggered, this, [item, this](bool){
 		this->connect_to_device(item);
 	});
 
@@ -88,11 +101,14 @@ void Gui::MainWindow::device_clicked(const QPoint &point)
 
 void Gui::MainWindow::new_device_found(const QString &name, const QString &ip)
 {
-	avail_devices->addItem(new QListWidgetItem(QIcon(DEVICE_IMG_PATH), name + ":" + ip));
+	QListWidgetItem *item = new QListWidgetItem(QIcon(DEVICE_IMG_PATH), name + ":" + ip);
+
+	avail_devices->addItem(item);
 	add_new_event("Found new device " + name, Gui::INFO);
 }
 
 int Gui::MainWindow::connect_to_device(QListWidgetItem *item)
 {
 	DEBUG_LOG << "Connecting to device " + device_info_to_ip(item->text());
+	item->setForeground(Qt::red);
 }
