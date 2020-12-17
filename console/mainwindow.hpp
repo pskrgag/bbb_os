@@ -8,6 +8,7 @@
 #include <QSharedPointer>
 #include <QThread>
 #include <QHBoxLayout>
+#include <QMenu>
 
 #include <new>		/* std::bad_alloc */
 #include <algorithm>
@@ -31,7 +32,7 @@ public:
 	explicit MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
-	void add_new_event(const QString &info, Gui::EventLevels level);
+	void add_new_event(const QString &, Gui::EventLevels);
 	void remove_device(QListWidgetItem *);
 private:
 	Net::OlafClient *pinger;
@@ -41,8 +42,12 @@ private:
 	QListWidget *console_logger;
 	QThread pinger_thread;
 	QMap<EventLevels, QString> icons_map;
+
+private slots:
+	int connect_to_device(QListWidgetItem *item);
 public slots:
-	void new_device_found(const QString &name, const QString &ip);
+	void new_device_found(const QString &, const QString &);
+	void device_clicked(const QPoint &);
 };
 
 } /* Gui namespace */

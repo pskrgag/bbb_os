@@ -17,6 +17,7 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 
 	/* Connect pinger to MainWindow */
 	connect(pinger, &Net::OlafClient::found_device, this, &Gui::MainWindow::new_device_found);
+	connect(avail_devices, &QListWidget::customContextMenuRequested, this, &Gui::MainWindow::device_clicked);
 	pinger->moveToThread(&pinger_thread);
 
 	/* Start ping routine */
@@ -33,13 +34,12 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	vertical_splitter->addWidget(device_state);
 	vertical_splitter->addWidget(console_logger);
 
-	//vertical_splitter->setSizes(QList<int>() << 200 << 50);
-
-	new_device_found("aaa", "bbb");
-	new_device_found("CCC", "CCC");
 	resize(1500, 1000);
 	setSizes(QList<int>() << width() * 1/7 << width() * 6/7);
 	vertical_splitter->setSizes(QList<int>() << height() * 5/7 << height() * 2/7);
+
+	avail_devices->setContextMenuPolicy(Qt::CustomContextMenu);
+	new_device_found("aaa", "bbb");
 }
 
 Gui::MainWindow::~MainWindow()
@@ -60,8 +60,33 @@ void Gui::MainWindow::remove_device(QListWidgetItem *item)
 
 }
 
+void Gui::MainWindow::device_clicked(const QPoint &point)
+{
+	QPoint globalPos = avail_devices->mapToGlobal(point);
+	QMenu device_menu;
+	QListWidgetItem *item = avail_devices->itemAt(point);
+	QAction *action;
+
+	if (!item)
+		return;
+
+	action = device_menu.addAction("Connect");
+	action->setData(item->text());
+
+	connect(action, &QAction::triggered, this, [item, this](bool){
+		this->connect_to_device(item);
+	});
+
+	device_menu.exec(globalPos);
+}
+
 void Gui::MainWindow::new_device_found(const QString &name, const QString &ip)
 {
 	avail_devices->addItem(new QListWidgetItem(QIcon(DEVICE_IMG_PATH), name + ":" + ip));
 	add_new_event("Found new device " + name, Gui::INFO);
+}
+
+int Gui::MainWindow::connect_to_device(QListWidgetItem *item)
+{
+	DEBUG_LOG << "Connecting to device " + item->text();
 }
