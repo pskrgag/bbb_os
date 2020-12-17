@@ -22,7 +22,7 @@ class OlafClient : public QObject
 	QVector<int> to_ping;
 
 	QString get_device_name();
-	void set_blocking(sock_t sock);
+	int set_blocking(sock_t sock);
 public:
 	explicit OlafClient();
 	~OlafClient();

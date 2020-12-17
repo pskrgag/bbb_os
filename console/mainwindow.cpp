@@ -1,18 +1,20 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
-#define IMG_PATH			"/home/pskrgag/Pictures/1.png"		/* TODO: make this picture part of the project */
+#define DEVICE_IMG_PATH			"/home/pskrgag/Pictures/1.png"		/* TODO: make this picture part of the project */
+#define INFO_IMG_PATH			"/home/pskrgag/Pictures/2.png"		/* TODO: make this picture part of the project */
 
 Gui::MainWindow::MainWindow(QWidget *parent):
-	QMainWindow(parent),
+	QSplitter(Qt::Horizontal, parent),
 	pinger(new Net::OlafClient),
-	ui(new Ui::MainWindow),
-	horizontal_splitter(new QSplitter(Qt::Horizontal)),
 	vertical_splitter(new QSplitter(Qt::Vertical)),
 	avail_devices(new QListWidget(this)),
 	device_state(new QWidget(this)),
-	console_logger(new QTextEdit(this))
+	console_logger(new QListWidget(this))
 {
+	/* fill icons map */
+	icons_map[INFO] = INFO_IMG_PATH;
+
 	/* Connect pinger to MainWindow */
 	connect(pinger, &Net::OlafClient::found_device, this, &Gui::MainWindow::new_device_found);
 	pinger->moveToThread(&pinger_thread);
@@ -22,63 +24,44 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	pinger_thread.start();
 
 	/* widgets set up */
-	console_logger->setReadOnly(true);
 	device_state->setStyleSheet("background-color: blue");
 
 	/* splitters set up */
-	horizontal_splitter->addWidget(avail_devices);
-	horizontal_splitter->addWidget(vertical_splitter);
-
-	{
-		int min,max;
-
-		horizontal_splitter->getRange(0, &min,&max);
-		DEBUG_LOG << min << max;
-	}
+	addWidget(avail_devices);
+	addWidget(vertical_splitter);
 
 	vertical_splitter->addWidget(device_state);
 	vertical_splitter->addWidget(console_logger);
 
-	horizontal_splitter->setSizes(QList<int>() << 50 << 300);
-	vertical_splitter->setSizes(QList<int>() << 200 << 50);
+	//vertical_splitter->setSizes(QList<int>() << 200 << 50);
 
-	setCentralWidget(horizontal_splitter);
-	ui->setupUi(this);
-
-	DEBUG_LOG << "Running...";
+	new_device_found("aaa", "bbb");
+	new_device_found("CCC", "CCC");
+	resize(1500, 1000);
+	setSizes(QList<int>() << width() * 1/7 << width() * 6/7);
+	vertical_splitter->setSizes(QList<int>() << height() * 5/7 << height() * 2/7);
 }
 
 Gui::MainWindow::~MainWindow()
 {
-	delete ui;
-	delete horizontal_splitter;
 	delete vertical_splitter;
 	delete avail_devices;
 	delete device_state;
 	delete console_logger;
 }
 
-void Gui::MainWindow::add_device(QListWidgetItem *item)
+void Gui::MainWindow::add_new_event(const QString &info, Gui::EventLevels level)
 {
-	if (!item)
-		return;
-
-	device_list.push_back(QSharedPointer<QListWidgetItem>(item));
-	avail_devices->addItem(device_list.back().data());
+	console_logger->addItem(new QListWidgetItem(QIcon(icons_map[level]), info));
 }
 
 void Gui::MainWindow::remove_device(QListWidgetItem *item)
 {
-	auto item_iter = std::find(device_list.begin(), device_list.end(), QSharedPointer<QListWidgetItem>(item));
 
-	if (!item)
-		return;
-
-	device_list.erase(item_iter);
-	avail_devices->removeItemWidget((*item_iter).data());
 }
 
 void Gui::MainWindow::new_device_found(const QString &name, const QString &ip)
 {
-	add_device(new QListWidgetItem(QIcon(IMG_PATH), name + ":" + ip));
+	avail_devices->addItem(new QListWidgetItem(QIcon(DEVICE_IMG_PATH), name + ":" + ip));
+	add_new_event("Found new device " + name, Gui::INFO);
 }
