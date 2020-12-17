@@ -12,6 +12,7 @@
 
 #include <new>		/* std::bad_alloc */
 #include <algorithm>
+#include <cstring>
 
 #include "debug.hpp"
 #include "olafclient.h"
