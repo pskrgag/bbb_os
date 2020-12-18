@@ -1,5 +1,5 @@
-#ifndef OLAFCLIENT_H
-#define OLAFCLIENT_H
+#ifndef OLAFSTATUSCHECKER_H
+#define OLAFSTATUSCHECKER_H
 
 #include <QTcpSocket>
 #include <QThread>
@@ -8,7 +8,7 @@
 
 #include <set>
 
-#include "debug.hpp"
+#include "debug.h"
 #include <bone/olaf.h>
 #include <bone/olaf_api.h>
 
@@ -43,4 +43,4 @@ signals:
 
 } /* namespace Net */
 
-#endif // OLAFCLIENT_H
+#endif // OLAFSTATUSCHECKER_H
