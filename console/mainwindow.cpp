@@ -1,4 +1,4 @@
-#include "mainwindow.hpp"
+#include "mainwindow.h"
 
 #define DEVICE_IMG_PATH			"/home/pskrgag/Pictures/1.png"		/* TODO: make this picture part of the project */
 #define INFO_IMG_PATH			"/home/pskrgag/Pictures/2.png"		/* TODO: make this picture part of the project */
@@ -16,7 +16,7 @@ static inline QString device_info_to_name(const QString &info)
 
 Gui::MainWindow::MainWindow(QWidget *parent):
 	QSplitter(Qt::Horizontal, parent),
-	pinger(new Net::OlafClient),
+	pinger(new Net::OlafStatusChecker),
 	vertical_splitter(new QSplitter(Qt::Vertical)),
 	avail_devices(new QListWidget(this)),
 	device_state(new QWidget(this)),
@@ -26,14 +26,14 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	icons_map[INFO] = INFO_IMG_PATH;
 
 	/* Connect pinger to MainWindow */
-	connect(pinger, &Net::OlafClient::found_device, this, &Gui::MainWindow::new_device_found);
+	connect(pinger, &Net::OlafStatusChecker::found_device, this, &Gui::MainWindow::new_device_found);
 	connect(avail_devices, &QListWidget::customContextMenuRequested, this, &Gui::MainWindow::device_clicked);
-	connect(pinger, &Net::OlafClient::device_died, this, &Gui::MainWindow::remove_device);
+	connect(pinger, &Net::OlafStatusChecker::device_died, this, &Gui::MainWindow::remove_device);
 
 	pinger->moveToThread(&pinger_thread);
 
 	/* Start ping routine */
-	connect(&pinger_thread, &QThread::started, pinger, &Net::OlafClient::ping);
+	connect(&pinger_thread, &QThread::started, pinger, &Net::OlafStatusChecker::ping);
 	pinger_thread.start();
 
 	/* widgets set up */

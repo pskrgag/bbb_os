@@ -2,8 +2,7 @@
 #include <QTextEdit>
 #include <QSplitter>
 
-#include "mainwindow.hpp"
-#include "olafclient.h"
+#include "mainwindow.h"
 
 int main(int argc, char **argv)
 {

@@ -11,7 +11,7 @@ ELSEIF(CMAKE_BUILD_TYPE MATCHES Debug)
         include_directories(../include)
 ENDIF()
 
-add_executable(${PROJECT_NAME} console.cpp mainwindow.cpp mainwindow.hpp olafclient.h olafclient.cpp debug.hpp)
+add_executable(${PROJECT_NAME} console.cpp mainwindow.cpp mainwindow.h olafstatuscheker.h olafstatuscheker.cpp debug.hpp)
 set_target_properties(console PROPERTIES AUTOMOC ON)
 
 find_package(Qt5 COMPONENTS Gui Core Widgets Network REQUIRED)

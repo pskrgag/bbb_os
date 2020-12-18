@@ -1,4 +1,4 @@
-#include "olafclient.h"
+#include "olafstatuscheker.h"
 
 #include <cstring>
 #include <fcntl.h>
@@ -7,16 +7,16 @@
 
 #define QT_DESTRIPTOR_TO_UNIX(fd)	static_cast<sock_t>(fd->socketDescriptor())
 
-Net::OlafClient::OlafClient():
+Net::OlafStatusChecker::OlafStatusChecker():
 	to_ping(100)
 {
 	for(int i = 0; i < 100; ++i)
 		to_ping[i] = i + 1;
 }
 
-Net::OlafClient::~OlafClient() = default;
+Net::OlafStatusChecker::~OlafStatusChecker() = default;
 
-void Net::OlafClient::ping()
+void Net::OlafStatusChecker::ping()
 {
 	const QString ip = "192.168.7.";
 	QString name;
@@ -55,7 +55,7 @@ void Net::OlafClient::ping()
 	}
 }
 
-QString Net::OlafClient::get_device_name(QTcpSocket *socket)
+QString Net::OlafStatusChecker::get_device_name(QTcpSocket *socket)
 {
 	struct olaf_device_info info;
 	int res;
@@ -75,7 +75,7 @@ QString Net::OlafClient::get_device_name(QTcpSocket *socket)
 	return QString(info.name);
 }
 
-int Net::OlafClient::set_blocking(sock_t sock)
+int Net::OlafStatusChecker::set_blocking(sock_t sock)
 {
 	int flags = fcntl(sock, F_GETFL);
 
@@ -85,7 +85,7 @@ int Net::OlafClient::set_blocking(sock_t sock)
 	return fcntl(sock, F_SETFL, flags & (~O_NONBLOCK));
 }
 
-void Net::OlafClient::device_keep_alive(QTcpSocket *sock, const QString &name)
+void Net::OlafStatusChecker::device_keep_alive(QTcpSocket *sock, const QString &name)
 {
 	uint64_t data = OLAF_KEEP_ALIVE;
 	int res;
