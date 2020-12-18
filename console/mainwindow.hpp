@@ -34,7 +34,6 @@ public:
 	~MainWindow();
 
 	void add_new_event(const QString &, Gui::EventLevels);
-	void remove_device(QListWidgetItem *);
 private:
 	Net::OlafClient *pinger;
 	QSplitter *vertical_splitter;
@@ -46,6 +45,7 @@ private:
 
 private slots:
 	int connect_to_device(QListWidgetItem *item);
+	void remove_device(const QString &);
 public slots:
 	void new_device_found(const QString &, const QString &);
 	void device_clicked(const QPoint &);

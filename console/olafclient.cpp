@@ -5,54 +5,61 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#define QT_DESTRIPTOR_TO_UNIX(fd)	static_cast<sock_t>(fd)
+#define QT_DESTRIPTOR_TO_UNIX(fd)	static_cast<sock_t>(fd->socketDescriptor())
 
 Net::OlafClient::OlafClient():
-	socket(this),
 	to_ping(100)
 {
 	for(int i = 0; i < 100; ++i)
 		to_ping[i] = i + 1;
 }
 
-Net::OlafClient::~OlafClient()
-{
-	socket.close();
-}
+Net::OlafClient::~OlafClient() = default;
 
 void Net::OlafClient::ping()
 {
 	const QString ip = "192.168.7.";
 	QString name;
+	QTcpSocket *socket;
 
 	while (1) {
 		for (int i = 0; i < to_ping.size(); ++i) {
 			QString current_ip(ip + QString::number(to_ping[i]));
 
-			DEBUG_LOG << "Pinging " + current_ip;
+			socket = new QTcpSocket();
 
-			socket.connectToHost(current_ip, BoarPort);
+//			DEBUG_LOG << "Pinging " + current_ip;
 
-			if (socket.waitForConnected(30)) {
-				name = get_device_name();
+			socket->connectToHost(current_ip, BoarPort);
+
+			if (socket->waitForConnected(10)) {
+				name = get_device_name(socket);
 
 				if (name.size() == 0)
 					continue;
 
 				to_ping.remove(i);
+
+				QtConcurrent::run([this, socket, name](){
+					this->device_keep_alive(socket, name);
+				});
+
 				found_device(name, current_ip);
+
+				socket = nullptr;
+				continue;
 			}
 
-			socket.close();
+			delete socket;
 		}
 	}
 }
 
-QString Net::OlafClient::get_device_name()
+QString Net::OlafClient::get_device_name(QTcpSocket *socket)
 {
 	struct olaf_device_info info;
 	int res;
-	sock_t fd = QT_DESTRIPTOR_TO_UNIX(socket.socketDescriptor());
+	sock_t fd = QT_DESTRIPTOR_TO_UNIX(socket);
 
 	res = set_blocking(fd);
 	if (res < 0)
@@ -76,4 +83,24 @@ int Net::OlafClient::set_blocking(sock_t sock)
 		return flags;
 
 	return fcntl(sock, F_SETFL, flags & (~O_NONBLOCK));
+}
+
+void Net::OlafClient::device_keep_alive(QTcpSocket *sock, const QString &name)
+{
+	uint64_t data = OLAF_KEEP_ALIVE;
+	int res;
+
+	while ((res = sock->write(reinterpret_cast<char *>(&data), sizeof(data))) == sizeof(data)) {
+		if (!sock->flush())
+			break;
+
+		DEBUG_LOG << "res = " << QString::number(res);
+		QThread::sleep(1);
+	}
+
+	DEBUG_LOG << "died" << QString::number(res);
+
+	device_died(name);
+
+	delete sock;
 }

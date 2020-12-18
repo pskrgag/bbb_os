@@ -141,7 +141,7 @@ static inline size_t olaf_get_name(sock_t socket, const struct olaf_request *req
 static inline int pre_connection(sock_t socket)
 {
 	struct olaf_request req;
-	int res;
+	int res, ret_res;
 	void *ptr = NULL;
 	size_t size = 0;
 
@@ -167,7 +167,7 @@ static inline int pre_connection(sock_t socket)
 
 		size = olaf_get_name(socket, &req, ptr);
 
-		res = OLAF_GOT_NAME;
+		ret_res = OLAF_GOT_NAME;
 	}
 
 	req.code = htobe64(req.code);
@@ -178,17 +178,29 @@ static inline int pre_connection(sock_t socket)
 		goto error;
 	}
 
-	log_err("Sended Request\n");
-
 	res = send(socket, ptr, size, 0);
 	if (res != size)
 		res = OLAF_PRE_ERROR;
 
-	log_err("Sended args\n");
+	if (res != OLAF_PRE_ERROR)
+		res = ret_res;
 
 error:
 	free(ptr);
 	return res;
+}
+
+static inline int olaf_keep_alive(sock_t socket)
+{
+	uint64_t __recv;
+	int res;
+
+	while (1) {
+		res = recv(socket, &__recv, sizeof(uint64_t), 0);
+		log_err("res = %d", res);
+		if (res != sizeof(OLAF_KEEP_ALIVE))
+			return 0;
+	}
 }
 
 #endif /* __OLAF_PRIVATE_H */
