@@ -5,6 +5,8 @@
 
 /* This header file provides olaf commands */
 
+#define OLAF_KEEP_ALIVE		(238942743ULL)
+
 typedef int sock_t;
 
 struct olaf_request {

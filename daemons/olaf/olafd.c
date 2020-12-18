@@ -21,8 +21,12 @@ static void *__attribute__((noreturn)) user_main(void *data)
 	{
 	case OLAF_LOGGED:
 		break;
-	
-	case OLAF_GOT_NAME:	/* it's not an error but, getting the name is last command for this connection */
+	case OLAF_GOT_NAME:
+		/* this connection is for contoling device state.
+		   every 5 seconds cosole will send packet to detect if
+		   device is alive. if this function return, console closed connection */
+		olaf_keep_alive(socket);
+		goto error;
 	case OLAF_PRE_ERROR:
 		goto error;
 	}

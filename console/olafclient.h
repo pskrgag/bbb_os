@@ -2,6 +2,9 @@
 #define OLAFCLIENT_H
 
 #include <QTcpSocket>
+#include <QThread>
+#include <QFuture>
+#include <QtConcurrent/QtConcurrent>
 
 #include <set>
 
@@ -18,11 +21,12 @@ class OlafClient : public QObject
 {
 	Q_OBJECT
 
-	QTcpSocket socket;
 	QVector<int> to_ping;
+	QVector<QThread> threads;
 
-	QString get_device_name();
-	int set_blocking(sock_t sock);
+	QString get_device_name(QTcpSocket *sock);
+	int set_blocking(sock_t);
+	void device_keep_alive(QTcpSocket *, const QString &);
 public:
 	explicit OlafClient();
 	~OlafClient();
@@ -32,6 +36,7 @@ public slots:
 
 signals:
 	void found_device(const QString &, const QString &);
+	void device_died(const QString &);
 };
 
 } /* namespace Net */
