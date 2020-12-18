@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "debug.hpp"
+#include "debug.h"
 #include "olafstatuscheker.h"
 
 namespace Gui {

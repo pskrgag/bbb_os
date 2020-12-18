@@ -1,18 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
+
 project(console)
 
-set(CMAKE_CXX_STANDARD 14)
-
-IF(CMAKE_BUILD_TYPE MATCHES Release)
-        link_directories($ENV{LD_LIBRARY_PATH})
-        include_directories($ENV{INCLUDE_LIBRARY_PATH})
-ELSEIF(CMAKE_BUILD_TYPE MATCHES Debug)
-        link_directories(../../build/libs)
-        include_directories(../include)
-ENDIF()
-
-add_executable(${PROJECT_NAME} console.cpp mainwindow.cpp mainwindow.h olafstatuscheker.h olafstatuscheker.cpp debug.hpp)
-set_target_properties(console PROPERTIES AUTOMOC ON)
-
-find_package(Qt5 COMPONENTS Gui Core Widgets Network REQUIRED)
-target_link_libraries(console Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Network -lolaf)
+add_subdirectory(src)
