@@ -17,7 +17,7 @@ namespace Net{
 constexpr char BoardIp[] =	"192.168.7.2";
 constexpr uint16_t BoarPort =	1234;
 
-class OlafClient : public QObject
+class OlafStatusChecker : public QObject
 {
 	Q_OBJECT
 
@@ -28,8 +28,10 @@ class OlafClient : public QObject
 	int set_blocking(sock_t);
 	void device_keep_alive(QTcpSocket *, const QString &);
 public:
-	explicit OlafClient();
-	~OlafClient();
+	explicit OlafStatusChecker();
+	~OlafStatusChecker();
+
+	int connect_to_device();
 
 public slots:
 	void ping();

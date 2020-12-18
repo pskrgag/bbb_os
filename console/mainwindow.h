@@ -15,7 +15,7 @@
 #include <cstring>
 
 #include "debug.hpp"
-#include "olafclient.h"
+#include "olafstatuscheker.h"
 
 namespace Gui {
 
@@ -35,7 +35,7 @@ public:
 
 	void add_new_event(const QString &, Gui::EventLevels);
 private:
-	Net::OlafClient *pinger;
+	Net::OlafStatusChecker *pinger;
 	QSplitter *vertical_splitter;
 	QListWidget *avail_devices;
 	QWidget *device_state;
