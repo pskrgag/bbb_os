@@ -1,6 +1,8 @@
 #include "olafclient.h"
 
-olafclient::olafclient(QObject *parent) : QObject(parent)
+Net::OlafClient::OlafClient(const QString &ip)
 {
-
+	socket.connectToHost(ip, Net::BoarPort);
 }
+
+Net::OlafClient::~OlafClient() = default;

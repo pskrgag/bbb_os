@@ -9,13 +9,11 @@
 #include <set>
 
 #include "debug.h"
+#include "net.h"
 #include <bone/olaf.h>
 #include <bone/olaf_api.h>
 
 namespace Net{
-
-constexpr char BoardIp[] =	"192.168.7.2";
-constexpr uint16_t BoarPort =	1234;
 
 class OlafStatusChecker : public QObject
 {

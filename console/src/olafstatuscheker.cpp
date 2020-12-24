@@ -28,8 +28,6 @@ void Net::OlafStatusChecker::ping()
 
 			socket = new QTcpSocket();
 
-//			DEBUG_LOG << "Pinging " + current_ip;
-
 			socket->connectToHost(current_ip, BoarPort);
 
 			if (socket->waitForConnected(10)) {
