@@ -3,6 +3,5 @@ LD = arm-linux-gnueabihf-ld
 CXX_HOST = g++
 CC_HOST = gcc
 
-
 CMDS = compile link
 MAKEFLAGS += --silent

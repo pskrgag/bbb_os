@@ -2,16 +2,27 @@
 #define OLAFCLIENT_H
 
 #include <QObject>
+#include <QTcpSocket>
 
-class olafclient : public QObject
+#include "net.h"
+
+namespace Net {
+
+class OlafClient : public QObject
 {
 	Q_OBJECT
+	QTcpSocket socket;
 public:
-	explicit olafclient(QObject *parent = nullptr);
+	OlafClient(const QString &);
+	~OlafClient();
 
 signals:
 
 public slots:
+
 };
+
+
+} /* Net */
 
 #endif // OLAFCLIENT_H

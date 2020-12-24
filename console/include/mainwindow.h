@@ -10,12 +10,13 @@
 #include <QHBoxLayout>
 #include <QMenu>
 
-#include <new>		/* std::bad_alloc */
+#include <new>
 #include <algorithm>
 #include <cstring>
 
 #include "debug.h"
 #include "olafstatuscheker.h"
+#include "olafclient.h"
 
 namespace Gui {
 
@@ -41,10 +42,9 @@ private:
 	QWidget *device_state;
 	QListWidget *console_logger;
 	QThread pinger_thread;
-	QMap<EventLevels, QString> icons_map;
-
+	const QMap<EventLevels, QString> icons_map;
 private slots:
-	int connect_to_device(QListWidgetItem *item);
+	void connect_to_device(QListWidgetItem *item);
 	void remove_device(const QString &);
 public slots:
 	void new_device_found(const QString &, const QString &);

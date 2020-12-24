@@ -2,6 +2,7 @@
 
 #define DEVICE_IMG_PATH			"/home/pskrgag/Pictures/1.png"		/* TODO: make this picture part of the project */
 #define INFO_IMG_PATH			"/home/pskrgag/Pictures/2.png"		/* TODO: make this picture part of the project */
+#define ERROR_IMG_PATH			"/home/pskrgag/Pictures/3.png"		/* TODO: make this picture part of the project */
 
 static inline QString device_info_to_ip(const QString &info)
 {
@@ -20,11 +21,9 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	vertical_splitter(new QSplitter(Qt::Vertical)),
 	avail_devices(new QListWidget(this)),
 	device_state(new QWidget(this)),
-	console_logger(new QListWidget(this))
+	console_logger(new QListWidget(this)),
+	icons_map({{INFO, INFO_IMG_PATH}, {ERROR, ERROR_IMG_PATH}})
 {
-	/* fill icons map */
-	icons_map[INFO] = INFO_IMG_PATH;
-
 	/* Connect pinger to MainWindow */
 	connect(pinger, &Net::OlafStatusChecker::found_device, this, &Gui::MainWindow::new_device_found);
 	connect(avail_devices, &QListWidget::customContextMenuRequested, this, &Gui::MainWindow::device_clicked);
@@ -47,7 +46,7 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	vertical_splitter->addWidget(console_logger);
 
 	resize(1500, 1000);
-	setSizes(QList<int>() << width() * 1/7 << width() * 6/7);
+	setSizes(QList<int>() << width() * 2/7 << width() * 5/7);
 	vertical_splitter->setSizes(QList<int>() << height() * 5/7 << height() * 2/7);
 
 	avail_devices->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -69,8 +68,6 @@ void Gui::MainWindow::add_new_event(const QString &info, Gui::EventLevels level)
 void Gui::MainWindow::remove_device(const QString &name)
 {
 	QList<QListWidgetItem *> list = avail_devices->findItems(name, Qt::MatchContains);
-
-	DEBUG_LOG << "Im here!!!!" << name << QString::number(list.size());
 
 	if (!list.size())
 		return;
@@ -117,7 +114,7 @@ void Gui::MainWindow::new_device_found(const QString &name, const QString &ip)
 	add_new_event("Found new device " + name, Gui::INFO);
 }
 
-int Gui::MainWindow::connect_to_device(QListWidgetItem *item)
+void Gui::MainWindow::connect_to_device(QListWidgetItem *item)
 {
 	DEBUG_LOG << "Connecting to device " + device_info_to_ip(item->text());
 	item->setForeground(Qt::red);
