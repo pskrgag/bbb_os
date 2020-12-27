@@ -6,12 +6,15 @@ SUBDIRS = $(filter-out include/., $(wildcard */.))
 
 BUILD_DIR=$(O)/build
 
-all: $(SUBDIRS) $(CMDS)
+all: $(BUILD_DIR) $(SUBDIRS) $(CMDS)
 
 $(CMDS):
 	for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir $@ BUILD_DIR=$(BUILD_DIR); \
 	done
 
-.PHONY: $(CMDS) $(SUBDIRS)
+$(BUILD_DIR):
+	mkdir -p $@
+
+.PHONY: $(CMDS) $(SUBDIRS) clean
 .SILENT: $(CMDS)
