@@ -1,7 +1,7 @@
 #ifndef __OLAF_H__
 #define __OLAF_H__
 
-#include <bone/olaf_commands.h>
+#include <bone/api/olaf_commands.h>
 
 /* This header file provides olaf commands */
 

@@ -1,6 +1,6 @@
 TOPDIR=../../
 
-CFLAGS += -I $(TOPDIR)/include
+CFLAGS += -I include -I $(TOPDIR)/include
 
 SRCS = $(wildcard *.c)
 OUT = libolaf.so
@@ -10,6 +10,5 @@ compile:
 	$(CC_HOST) $(CFLAGS) -shared -o $(LIBS_DIR)/$(OUT) $(SRCS)
 
 link:
-
 
 include $(TOPDIR)/Makefile.variables

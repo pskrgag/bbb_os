@@ -1,11 +1,11 @@
 TOPDIR=../
 
-include $(PWD)/Makefile.variables
+MODULES_DIR=$(BUILD_DIR)/modules
 
-model-y := main/main_module.o
+model-y := main/main_module.o main/node.o
 obj-m := model.o
 
-MODULES_DIR=$(BUILD_DIR)/modules
+EXTRA_CFLAGS = -I $(PWD)/include
 
 compile: $(MODULES_DIR)
 	cp -r * $(MODULES_DIR)
@@ -15,3 +15,5 @@ link:
 
 $(MODULES_DIR):
 	mkdir -p $@
+
+include $(PWD)/Makefile.variables

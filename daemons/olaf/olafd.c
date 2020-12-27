@@ -7,8 +7,8 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include <bone/olaf_api.h>
-#include "olaf.h"
+#include <bone/api/olaf_api.h>
+#include "olafd.h"
 
 static void *__attribute__((noreturn)) user_main(void *data)
 {
