@@ -1,7 +1,11 @@
 #include <linux/module.h>
 
+#include <bone/system.h>
+
 static int __init main_module_init(void)
 {
+	bone_init_system();
+
 	return 0;
 }
 

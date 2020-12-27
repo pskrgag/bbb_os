@@ -10,8 +10,8 @@
 
 #include "debug.h"
 #include "net.h"
-#include <bone/olaf.h>
-#include <bone/olaf_api.h>
+#include <bone/api/olaf_api.h>
+#include <olaf/olaf.h>
 
 namespace Net{
 

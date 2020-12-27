@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include <bone/olaf_api.h>
+#include <bone/api/olaf_api.h>
 
 /* NAME: olaf_call
  * 	Simple wrapper on send() + recv() functions

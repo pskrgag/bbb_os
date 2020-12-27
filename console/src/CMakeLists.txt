@@ -12,14 +12,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC ON)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIR})
 
-message("Found env $ENV{INCLUDE_LIBRARY_PATH}")
-
-IF(CMAKE_BUILD_TYPE MATCHES Release)
-        target_link_directories(${PROJECT_NAME} PRIVATE $ENV{LD_LIBRARY_PATH})
-        target_include_directories(${PROJECT_NAME} PUBLIC $ENV{INCLUDE_LIBRARY_PATH})
-ELSEIF(CMAKE_BUILD_TYPE MATCHES Debug)
+IF(CMAKE_BUILD_TYPE MATCHES Debug)
         target_link_directories(${PROJECT_NAME} PRIVATE ../../../build/libs)
-        target_include_directories(${PROJECT_NAME} PUBLIC ../../include)
+        target_include_directories(${PROJECT_NAME} PUBLIC ../../include ../../libs/libolaf/include/)
 ENDIF()
 
 find_package(Qt5 COMPONENTS Gui Core Widgets Network REQUIRED)

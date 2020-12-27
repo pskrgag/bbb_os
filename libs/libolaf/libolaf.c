@@ -2,7 +2,7 @@
 #include <endian.h>
 #include <errno.h>
 
-#include <bone/olaf.h>
+#include <olaf/olaf.h>
 
 /* Helper functions to communicate with olaf daemon */
 
