@@ -2,7 +2,7 @@ TOPDIR=../
 
 MODULES_DIR=$(BUILD_DIR)/modules
 
-model-y := main/main_module.o main/node.o
+model-y := main/main_module.o main/node.o main/system.o
 obj-m := model.o
 
 EXTRA_CFLAGS = -I $(PWD)/include

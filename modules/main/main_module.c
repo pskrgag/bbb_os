@@ -11,7 +11,7 @@ static int __init main_module_init(void)
 
 static void __exit main_module_exit(void)
 {
-
+	bone_clean_system();
 }
 
 module_init(main_module_init);
