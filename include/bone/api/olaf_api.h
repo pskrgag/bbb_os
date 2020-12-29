@@ -1,5 +1,5 @@
-#ifndef __OLAF_H__
-#define __OLAF_H__
+#ifndef __API_OLAF_H
+#define __API_OLAF_H
 
 #include <bone/api/olaf_commands.h>
 

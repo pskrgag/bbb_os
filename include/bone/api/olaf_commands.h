@@ -1,7 +1,7 @@
-#ifndef __OLAF_COMMANDS_H__
-#define __OLAF_COMMANDS_H__
+#ifndef __OLAF_COMMANDS_H
+#define __OLAF_COMMANDS_H
 
-#include <stdint.h>
+#include <stddef.h>
 
 /* for structures */
 #define __packed		__attribute__((packed))
@@ -28,8 +28,8 @@ struct olaf_packet {
  * Write commands allows send structure to device
  */
 
-#define OLAF_READ		(1 << 0)
-#define OLAF_WRITE		(1 << 1)
+#define OLAF_READ				(1 << 0)
+#define OLAF_WRITE				(1 << 1)
 
 /* Defines new command */
 #define __OLAF_COMMAND(id, arg_size, perms)	((uint64_t) (id | (arg_size << 8) | ( (uint64_t) perms << 40)))
@@ -38,5 +38,5 @@ struct olaf_packet {
 #define OLAF_COMMAND_ARGS_SIZE(command)		((command >> 8) & 0xffffffff)
 #define OLAF_COMMAND_PERMS(command)		(command >> 40)
 
-#define OLAF_WRONG_CODE			(~0ull)
+#define OLAF_WRONG_CODE				(~0ull)
 #endif /* __OLAF_COMMANDS_H__ */
