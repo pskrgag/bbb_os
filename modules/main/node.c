@@ -2,14 +2,23 @@
 #include <linux/cdev.h>
 #include <linux/fs.h>
 #include <linux/device.h>
+#include <linux/uaccess.h>
+#include <linux/slab.h>
 
 #include <bone/node.h>
+#include <bone/system.h>
+#include <bone/api/olaf_api.h>
+#include <bone/ioctl.h>
+#include <bone/api/ioclt.h>
+
+long bone_ioctl(struct file *, unsigned int, unsigned long);
 
 static dev_t dev_num;
 static struct cdev *cdev;
+
 static struct file_operations bone_fops = {
 	.owner = THIS_MODULE,
-
+	.unlocked_ioctl = bone_ioctl
 };
 
 static struct class *class;
@@ -62,4 +71,43 @@ void __exit bone_destroy_node(void)
 	class_destroy(class);
 	cdev_del(cdev);
 	unregister_chrdev_region(dev_num, 1);
+}
+
+long bone_ioctl(struct file *fl, unsigned int cmd, unsigned long arg)
+{
+	struct bone_request req;
+	ssize_t res;
+	void *arg_kern;
+
+	/* this copy is needed to verify user's pointer */
+	if (copy_from_user(&req, (void *) arg, sizeof(req)))
+		return -EINVAL;
+
+	arg_kern = kmalloc(OLAF_COMMAND_ARGS_SIZE(req.code), GFP_KERNEL);
+	if (!arg)
+		return -ENOMEM;
+
+	/* this copy is needed to verify user's pointer */
+	if (OLAF_COMMAND_PERMS(req.code) & OLAF_WRITE) {
+		if (copy_from_user(arg_kern, req.arg,
+			OLAF_COMMAND_ARGS_SIZE(req.code)))
+			return -EINVAL;
+	}
+
+	switch(cmd) {
+	case BONE_DEV:
+		res = bone_disp(req.code, arg_kern);
+		break;
+	default:
+		pr_err("Wrong command");
+		return 1;
+	}
+
+	if (OLAF_COMMAND_PERMS(req.code) & OLAF_READ) {
+		if (copy_to_user(req.arg, arg_kern,
+			OLAF_COMMAND_ARGS_SIZE(req.code)))
+			return -EINVAL;
+	}
+
+	return 0;
 }

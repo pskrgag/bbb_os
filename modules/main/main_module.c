@@ -4,7 +4,11 @@
 
 static int __init main_module_init(void)
 {
-	bone_init_system();
+	int res;
+
+	res = bone_init_system();
+	if (res < 0)
+		return -1;
 
 	return 0;
 }
