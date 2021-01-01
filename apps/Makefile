@@ -4,11 +4,11 @@ include $(TOPDIR)/Makefile.variables
 
 SUBDIRS := $(wildcard */.)
 
-DAEMONS_DIR=$(BUILD_DIR)/daemons
+APPS_DIR=$(BUILD_DIR)/apps
 
 $(CMDS):
 	for dir in $(SUBDIRS); do \
-		$(MAKE) -C $$dir $@ DAEMONS_DIR=$(DAEMONS_DIR); \
+		$(MAKE) -C $$dir $@ APPS_DIR=$(APPS_DIR); \
 	done
 
 .PHONY: all $(SUBDIRS)

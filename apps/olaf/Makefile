@@ -6,7 +6,7 @@ LFLAGS += -lpthread
 SRCS = $(wildcard *.c)
 OUT = olafd
 
-OLAF_DIR = $(DAEMONS_DIR)/olaf
+OLAF_DIR = $(APPS_DIR)/olafd
 
 compile: $(OLAF_DIR) $(OLAF_DIR)/$(OUT).o
 

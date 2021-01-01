@@ -39,4 +39,5 @@ struct olaf_packet {
 #define OLAF_COMMAND_PERMS(command)		(command >> 40)
 
 #define OLAF_WRONG_CODE				(~0ull)
+
 #endif /* __OLAF_COMMANDS_H__ */

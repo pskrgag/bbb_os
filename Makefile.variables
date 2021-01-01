@@ -1,12 +1,13 @@
-# Bunitils
-CC = arm-linux-gnueabihf-gcc
-LD = arm-linux-gnueabihf-ld
-CXX_HOST = g++
-CC_HOST = gcc
-
 # Cross-compile stuff
 ARCH=arm
+TARGET=arm-linux-gnueabihf
 
 # Makefile stuff
 CMDS = compile link
 MAKEFLAGS += --silent
+
+# Bunitils
+CC = $(TARGET)-gcc
+LD = $(TARGET)-ld
+CXX_HOST = g++
+CC_HOST = gcc
