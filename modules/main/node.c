@@ -40,6 +40,7 @@ int __init bone_create_node(void)
 	}
 
 	cdev_init(cdev, &bone_fops);
+	cdev->owner = THIS_MODULE;
 
 	res = cdev_add(cdev, dev_num, 1);
 	if (res < 0) {
@@ -90,7 +91,7 @@ long bone_ioctl(struct file *fl, unsigned int cmd, unsigned long arg)
 	/* this copy is needed to verify user's pointer */
 	if (OLAF_COMMAND_PERMS(req.code) & OLAF_WRITE) {
 		if (copy_from_user(arg_kern, req.arg,
-			OLAF_COMMAND_ARGS_SIZE(req.code)))
+		    OLAF_COMMAND_ARGS_SIZE(req.code)))
 			return -EINVAL;
 	}
 
@@ -100,14 +101,21 @@ long bone_ioctl(struct file *fl, unsigned int cmd, unsigned long arg)
 		break;
 	default:
 		pr_err("Wrong command");
-		return 1;
+		res = -EINVAL;
 	}
+
+	if (res < 0)
+		goto end;
 
 	if (OLAF_COMMAND_PERMS(req.code) & OLAF_READ) {
 		if (copy_to_user(req.arg, arg_kern,
-			OLAF_COMMAND_ARGS_SIZE(req.code)))
+		    OLAF_COMMAND_ARGS_SIZE(req.code)))
 			return -EINVAL;
 	}
 
-	return 0;
+	res = 0;
+
+end:
+	kfree(arg_kern);
+	return res;
 }

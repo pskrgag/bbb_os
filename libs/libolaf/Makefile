@@ -3,11 +3,13 @@ TOPDIR=../../
 CFLAGS += -I include -I $(TOPDIR)/include
 
 SRCS = $(wildcard *.c)
-OUT = libolaf.so
+LIB = libolaf.so
 
-compile:
-	@echo "LD 	$(LIBS_DIR)/$(OUT)"
-	$(CC_HOST) $(CFLAGS) -shared -o $(LIBS_DIR)/$(OUT) $(SRCS)
+compile: $(LIBS_DIR)/$(LIB)
+
+$(LIBS_DIR)/$(LIB):
+	@echo "LD 	$(LIBS_DIR)/$(LIB)"
+	$(CC_HOST) $(CFLAGS) -shared -o $(LIBS_DIR)/$(LIB) $(SRCS)
 
 link:
 
