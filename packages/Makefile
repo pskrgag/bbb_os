@@ -6,11 +6,14 @@ LOGS_DIR = $(PACKAGES_DIR)/logs
 ROOTFS_DIR = $(PACKAGES_DIR)/rootfs
 
 HOST = i686-pc-linux-gnu
+LOADADDR = 0x82000000
 
-compile: $(LOGS_DIR) $(PACKAGES_DIR) $(PACKAGES) clean
-link: rootfs
+IMAGE_NAME = image.img
 
-.PHONY: rootfs
+compile: $(LOGS_DIR) $(PACKAGES_DIR) $(PACKAGES)
+link: root initramfs main_image clean
+
+.PHONY: root initramfs main_image
 
 BUSYBOX = busybox-1.32.1
 GLIBC = glibc-2.26
@@ -24,6 +27,13 @@ busybox: $(PACKAGES_DIR)/logs/$(BUSYBOX).d
 glibc: $(PACKAGES_DIR)/logs/$(GLIBC).d
 
 $(PACKAGES_DIR)/logs/linux.d: $(PACKAGES_DIR)/linux
+	$(MAKE) -C $(PACKAGES_DIR)/linux					\
+	ARCH=$(ARCH)								\
+	CROSS_COMPILE=$(TARGET)-						\
+	uImage									\
+	dtbs									\
+	LOADADDR=$(LOADADDR)							\
+	-j10 >> $(PACKAGES_DIR)/logs/linux.d 2>&1
 
 # linux kernel
 
@@ -68,7 +78,6 @@ $(PACKAGES_DIR)/$(BUSYBOX):
 	@tar -xf $(PACKAGES_DIR)/busybox.tar.bz2 -C $(PACKAGES_DIR)
 
 # glibc
-# sudo apt-get install libgettextpo-dev
 
 $(PACKAGES_DIR)/logs/$(GLIBC).d: $(PACKAGES_DIR)/$(GLIBC)
 	@mkdir -p $(PACKAGES_DIR)/glibc_build
@@ -92,14 +101,44 @@ $(PACKAGES_DIR)/$(GLIBC):
 	@wget -q $(GLIBC_URL) -O $(PACKAGES_DIR)/glibc.tar.xz
 	@tar -xf $(PACKAGES_DIR)/glibc.tar.xz -C $(PACKAGES_DIR)
 
+main_image:
+	@echo "Generating main image..."
+	@mkimage -A $(ARCH)							\
+	-T kernel								\
+	-C none									\
+	-a $(LOADADDR)								\
+	-e $(LOADADDR)								\
+	-n "Custom Image"							\
+	-d $(PACKAGES_DIR)/linux/arch/arm/boot/zImage				\
+	$(PACKAGES_DIR)/initramfs						\
+	$(PACKAGES_DIR)/linux/arch/arm/boot/dts/am335x-boneblack.dtb		\
+	$(PACKAGES_DIR)/$(IMAGE_NAME)
 
-rootfs:
-	@rsync $(PWD)/rootfs $(ROOTFS_DIR)
+root:
+	@rsync -q $(PWD)/rootfs $(ROOTFS_DIR)
+
+initramfs:
+	@echo "Generating initramfs..."
+	@cd $(ROOTFS_DIR);								\
+	find $(ROOTFS_DIR) | cpio --quiet -H newc -o > $(PACKAGES_DIR)/initramfs.cpio;	\
+	cat $(PACKAGES_DIR)/initramfs.cpio | gzip > $(PACKAGES_DIR)/initramfs.gz
+
+	@mkimage								\
+	-A $(ARCH)								\
+	-O Linux								\
+	-T ramdisk								\
+	-C none									\
+	-a 0x8294f200								\
+	-n "Root Filesystem"							\
+	-d $(PACKAGES_DIR)/initramfs.gz 					\
+	$(PACKAGES_DIR)/initramfs						\
 
 clean:
 	@rm -f $(PACKAGES_DIR)/*.zip
 	@rm -f $(PACKAGES_DIR)/*.bz2
 	@rm -f $(PACKAGES_DIR)/*.xz
+	@rm -f $(PACKAGES_DIR)/*.gz
+	@rm -f $(PACKAGES_DIR)/*.cpio
 
 $(ROOTFS_DIR):
 	@mkdir -p $@
