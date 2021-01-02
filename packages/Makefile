@@ -1,9 +1,9 @@
 TOPDIR = ../
 
+include $(TOPDIR)/Makefile.variables
+
 PACKAGES = linux busybox glibc
-PACKAGES_DIR = $(BUILD_DIR)/packages
 LOGS_DIR = $(PACKAGES_DIR)/logs
-ROOTFS_DIR = $(PACKAGES_DIR)/rootfs
 
 HOST = i686-pc-linux-gnu
 LOADADDR = 0x82000000
@@ -115,7 +115,7 @@ main_image:
 	$(PACKAGES_DIR)/$(IMAGE_NAME)
 
 root:
-	@rsync -q $(PWD)/rootfs $(ROOTFS_DIR)
+	@rsync -aq $(PWD)/rootfs/ $(ROOTFS_DIR)
 
 initramfs:
 	@echo "Generating initramfs..."
@@ -149,4 +149,3 @@ $(PACKAGES_DIR):
 $(LOGS_DIR):
 	@mkdir -p $@
 
-include $(TOPDIR)/Makefile.variables

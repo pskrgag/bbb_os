@@ -1,5 +1,7 @@
 TOPDIR=../..
 
+include $(TOPDIR)/Makefile.variables
+
 CFLAGS += -I $(TOPDIR)/include
 LFLAGS += -lpthread
 
@@ -22,7 +24,6 @@ link: $(OLAF_DIR)/$(OUT)
 $(OLAF_DIR)/$(OUT): $(OLAF_DIR)/$(OUT).o
 	@echo "LD	$@"
 	$(CC) $(OLAF_DIR)/$(OUT).o -o $(OLAF_DIR)/$(OUT) $(LFLAGS)
+	@cp $(OLAF_DIR)/$(OUT) $(ROOTFS_DIR)/bin
 
 .PHONY: clean
-
-include $(TOPDIR)/Makefile.variables
