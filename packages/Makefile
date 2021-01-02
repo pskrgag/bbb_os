@@ -83,7 +83,7 @@ $(PACKAGES_DIR)/logs/$(GLIBC).d: $(PACKAGES_DIR)/$(GLIBC)
 	--disable-werror							\
 	--disable-java								\
 	--disable-native-java;							\
-	$(MAKE) -j10 >> $(PACKAGES_DIR)/logs/$(GLIBC).d 2>&1 ;			\
+	$(MAKE) -j10 >> $(PACKAGES_DIR)/logs/$(GLIBC).d 2>&1;			\
 	$(MAKE) install install_root=$(ROOTFS_DIR)				\
 	>> $(PACKAGES_DIR)/logs/$(GLIBC).d 2>&1;
 
