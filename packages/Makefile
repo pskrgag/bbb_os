@@ -8,10 +8,12 @@ ROOTFS_DIR = $(PACKAGES_DIR)/rootfs
 HOST = i686-pc-linux-gnu
 
 compile: $(LOGS_DIR) $(PACKAGES_DIR) $(PACKAGES) clean
-link:
+link: rootfs
+
+.PHONY: rootfs
 
 BUSYBOX = busybox-1.32.1
-GLIBC = glibc-2.24
+GLIBC = glibc-2.26
 
 LINUX_URL = https://github.com/beagleboard/linux/archive/4.14.zip
 BUSYBOX_USL = https://www.busybox.net/downloads/$(BUSYBOX).tar.bz2
@@ -38,24 +40,27 @@ $(PACKAGES_DIR)/logs/$(BUSYBOX).d: $(PACKAGES_DIR)/$(BUSYBOX) $(ROOTFS_DIR)
 	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
 		ARCH=$(ARCH)							\
 		CROSS_COMPILE=$(TARGET)-					\
-		distclean
+		distclean							\
+		>> $(PACKAGES_DIR)/logs/$(BUSYBOX).d 2>&1
 
 	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
 		ARCH=$(ARCH)							\
 		CROSS_COMPILE=$(TARGET)-					\
-		defconfig
+		defconfig							\
+		>> $(PACKAGES_DIR)/logs/$(BUSYBOX).d 2>&1
 
 	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
 		ARCH=$(ARCH)							\
 		CROSS_COMPILE=$(TARGET)-					\
-		-j10 > $(PACKAGES_DIR)/logs/$(BUSYBOX).d
+		-j10								\
+		>> $(PACKAGES_DIR)/logs/$(BUSYBOX).d 2>&1
 
 	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
 		ARCH=$(ARCH)							\
 		CROSS_COMPILE=$(TARGET)-					\
 		install								\
 		CONFIG_PREFIX=$(PACKAGES_DIR)/rootfs				\
-		>> $(PACKAGES_DIR)/logs/$(BUSYBOX).d
+		>> $(PACKAGES_DIR)/logs/$(BUSYBOX).d 2>&1
 
 $(PACKAGES_DIR)/$(BUSYBOX):
 	@echo "Downloading busybox..."
@@ -63,23 +68,33 @@ $(PACKAGES_DIR)/$(BUSYBOX):
 	@tar -xf $(PACKAGES_DIR)/busybox.tar.bz2 -C $(PACKAGES_DIR)
 
 # glibc
+# sudo apt-get install libgettextpo-dev
 
 $(PACKAGES_DIR)/logs/$(GLIBC).d: $(PACKAGES_DIR)/$(GLIBC)
 	@mkdir -p $(PACKAGES_DIR)/glibc_build
-	cd $(PACKAGES_DIR)/glibc_build;						\
+	@cd $(PACKAGES_DIR)/glibc_build;					\
 	../$(GLIBC)/configure $(TARGET)						\
 	--target=$(TARGET)							\
 	--build=$(HOST)								\
 	--prefix=								\
-	--enable-add-ons;							\
-	$(MAKE) -j10;								\
+	--enable-add-ons							\
+	--disable-nls								\
+	--disable-multi-arch							\
+	--disable-werror							\
+	--disable-java								\
+	--disable-native-java;							\
+	$(MAKE) -j10 >> $(PACKAGES_DIR)/logs/$(GLIBC).d 2>&1 ;			\
 	$(MAKE) install install_root=$(ROOTFS_DIR)				\
-	> $(PACKAGES_DIR)/logs/$(GLIBC).d;					\
+	>> $(PACKAGES_DIR)/logs/$(GLIBC).d 2>&1;
 
 $(PACKAGES_DIR)/$(GLIBC):
 	@echo "Downloading glibc..."
 	@wget -q $(GLIBC_URL) -O $(PACKAGES_DIR)/glibc.tar.xz
 	@tar -xf $(PACKAGES_DIR)/glibc.tar.xz -C $(PACKAGES_DIR)
+
+
+rootfs:
+	@rsync $(PWD)/rootfs $(ROOTFS_DIR)
 
 clean:
 	@rm -f $(PACKAGES_DIR)/*.zip

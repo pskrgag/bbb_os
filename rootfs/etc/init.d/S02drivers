@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Start logging
+#
+
+start() {
+	printf "Loading drivers: "
+	modprobe g_ether
+	echo "OK"
+}
+
+stop() {
+	printf "Unloading drivers: "
+	modprobe -r g_ether
+	echo "OK"
+}
+
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	stop
+	start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|reload}"
+	exit 1
+esac
+
+exit $?
