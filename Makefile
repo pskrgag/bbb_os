@@ -2,7 +2,7 @@
 
 include Makefile.variables
 
-SUBDIRS = $(filter-out include/., $(wildcard */.))
+SUBDIRS = apps console libs modules packages
 
 BUILD_DIR=$(O)/build
 
