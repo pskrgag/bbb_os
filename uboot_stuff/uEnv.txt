@@ -1,8 +1,8 @@
 console=ttyO0,115200n8
-serverip=192.168.27.1
-ipaddr=192.168.27.2
+serverip=192.168.7.1
+ipaddr=192.168.7.2
 fullpath=/var/lib/tftpboot/
 loadtftp=echo =============== Booting from tftp lol ===============;tftpboot 0x82000000 uImage;tftpboot 0x88000000 am335x-boneblack.dtb
 setbootargs=setenv bootargs console=${console} root=/dev/mmcblk0p2 rw
 uenvcmd=run loadtftp;run setbootargs;bootm 0x82000000 - 0x88000000
-
+bootcmd=run uenvcmd

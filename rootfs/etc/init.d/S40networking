@@ -6,6 +6,9 @@
 case "$1" in
 	start)
 		echo "Starting network..."
+		[ -d /var/run/network ] || mkdir /var/run/network
+
+		[ -f /var/run/network/ifstate ] || touch /var/run/network/ifstate
 		/sbin/ifup -a
 	;;
 	stop)

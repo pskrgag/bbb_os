@@ -7,3 +7,4 @@ My first try in embedded linux :////
 * arm-linux-gnuebihf 7.5
 * u-boot-tools
 * u-boot (builded once and does not change)
+* glibc dependencie
