@@ -6,6 +6,8 @@
 start() {
 	printf "Loading drivers: "
 	modprobe g_ether
+	mkdir -p /dev/pts
+	mount devpts /dev/pts -t devpts
 	echo "OK"
 }
 
