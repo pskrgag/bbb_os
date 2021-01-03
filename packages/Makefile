@@ -2,7 +2,7 @@ TOPDIR = ../
 
 include $(TOPDIR)/Makefile.variables
 
-PACKAGES = linux busybox glibc
+PACKAGES = linux busybox glibc dropbear
 LOGS_DIR = $(PACKAGES_DIR)/logs
 
 HOST = i686-pc-linux-gnu
@@ -17,28 +17,31 @@ link: root initramfs main_image clean
 
 BUSYBOX = busybox-1.32.1
 GLIBC = glibc-2.26
+DROPBEAR = dropbear-2020.80
 
 LINUX_URL = https://github.com/beagleboard/linux/archive/4.14.zip
 BUSYBOX_USL = https://www.busybox.net/downloads/$(BUSYBOX).tar.bz2
 GLIBC_URL = http://ftp.gnu.org/gnu/libc/$(GLIBC).tar.xz
+DROPBEAR_URL = https://matt.ucc.asn.au/dropbear/$(DROPBEAR).tar.bz2
 
-linux: $(PACKAGES_DIR)/logs/linux.d
-busybox: $(PACKAGES_DIR)/logs/$(BUSYBOX).d
-glibc: $(PACKAGES_DIR)/logs/$(GLIBC).d
+linux: $(LOGS_DIR)/linux.d
+busybox: $(LOGS_DIR)/$(BUSYBOX).d
+glibc: $(LOGS_DIR)/$(GLIBC).d
+dropbear: $(LOGS_DIR)/$(DROPBEAR).d
 
-$(PACKAGES_DIR)/logs/linux.d: $(PACKAGES_DIR)/linux
+$(LOGS_DIR)/linux.d: $(PACKAGES_DIR)/linux
 	$(MAKE) -C $(PACKAGES_DIR)/linux					\
 	ARCH=$(ARCH)								\
 	CROSS_COMPILE=$(TARGET)-						\
 	uImage									\
 	dtbs									\
 	LOADADDR=$(LOADADDR)							\
-	-j10 >> $(PACKAGES_DIR)/logs/linux.d 2>&1
+	-j10 >> $(LOGS_DIR)/linux.d 2>&1
 
 # linux kernel
 
 $(PACKAGES_DIR)/linux:
-	@echo "Downloading linux..."
+	@echo "Building linux..."
 	@wget -q $(LINUX_URL) -O $(PACKAGES_DIR)/linux.zip
 	@unzip $(PACKAGES_DIR)/linux.zip -d $(PACKAGES_DIR) > /dev/null 2>&1
 	@mv $(PACKAGES_DIR)/linux-4.14 $(PACKAGES_DIR)/linux
@@ -46,40 +49,40 @@ $(PACKAGES_DIR)/linux:
 
 # busybox
 
-$(PACKAGES_DIR)/logs/$(BUSYBOX).d: $(PACKAGES_DIR)/$(BUSYBOX) $(ROOTFS_DIR)
+$(LOGS_DIR)/$(BUSYBOX).d: | $(PACKAGES_DIR)/$(BUSYBOX) $(ROOTFS_DIR)
 	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
 		ARCH=$(ARCH)							\
 		CROSS_COMPILE=$(TARGET)-					\
 		distclean							\
-		>> $(PACKAGES_DIR)/logs/$(BUSYBOX).d 2>&1
+		>> $(LOGS_DIR)/$(BUSYBOX).d 2>&1
 
 	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
 		ARCH=$(ARCH)							\
 		CROSS_COMPILE=$(TARGET)-					\
 		defconfig							\
-		>> $(PACKAGES_DIR)/logs/$(BUSYBOX).d 2>&1
+		>> $(LOGS_DIR)/$(BUSYBOX).d 2>&1
 
 	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
 		ARCH=$(ARCH)							\
 		CROSS_COMPILE=$(TARGET)-					\
 		-j10								\
-		>> $(PACKAGES_DIR)/logs/$(BUSYBOX).d 2>&1
+		>> $(LOGS_DIR)/$(BUSYBOX).d 2>&1
 
 	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
 		ARCH=$(ARCH)							\
 		CROSS_COMPILE=$(TARGET)-					\
 		install								\
 		CONFIG_PREFIX=$(PACKAGES_DIR)/rootfs				\
-		>> $(PACKAGES_DIR)/logs/$(BUSYBOX).d 2>&1
+		>> $(LOGS_DIR)/$(BUSYBOX).d 2>&1
 
 $(PACKAGES_DIR)/$(BUSYBOX):
-	@echo "Downloading busybox..."
+	@echo "Building busybox..."
 	@wget -q $(BUSYBOX_USL) -O $(PACKAGES_DIR)/busybox.tar.bz2
 	@tar -xf $(PACKAGES_DIR)/busybox.tar.bz2 -C $(PACKAGES_DIR)
 
 # glibc
 
-$(PACKAGES_DIR)/logs/$(GLIBC).d: $(PACKAGES_DIR)/$(GLIBC)
+$(LOGS_DIR)/$(GLIBC).d: $(PACKAGES_DIR)/$(GLIBC)
 	@mkdir -p $(PACKAGES_DIR)/glibc_build
 	@cd $(PACKAGES_DIR)/glibc_build;					\
 	../$(GLIBC)/configure $(TARGET)						\
@@ -91,15 +94,39 @@ $(PACKAGES_DIR)/logs/$(GLIBC).d: $(PACKAGES_DIR)/$(GLIBC)
 	--disable-multi-arch							\
 	--disable-werror							\
 	--disable-java								\
-	--disable-native-java;							\
-	$(MAKE) -j10 >> $(PACKAGES_DIR)/logs/$(GLIBC).d 2>&1;			\
+	--disable-native-java >> $(LOGS_DIR)/$(GLIBC).d 2>&1;		\
+	$(MAKE) -j10 >> $(LOGS_DIR)/$(GLIBC).d 2>&1;			\
 	$(MAKE) install install_root=$(ROOTFS_DIR)				\
-	>> $(PACKAGES_DIR)/logs/$(GLIBC).d 2>&1;
+	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;
 
 $(PACKAGES_DIR)/$(GLIBC):
-	@echo "Downloading glibc..."
+	@echo "Building glibc..."
 	@wget -q $(GLIBC_URL) -O $(PACKAGES_DIR)/glibc.tar.xz
 	@tar -xf $(PACKAGES_DIR)/glibc.tar.xz -C $(PACKAGES_DIR)
+
+# dropbear
+
+$(LOGS_DIR)/$(DROPBEAR).d: | $(PACKAGES_DIR)/$(DROPBEAR)
+	@cd $(PACKAGES_DIR)/$(DROPBEAR);					\
+	./configure								\
+	--host=$(TARGET)							\
+	--disable-zlib								\
+	--prefix=$(ROOTFS_DIR)							\
+	CC=$(CC)								\
+	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1
+
+	$(MAKE) -C $(PACKAGES_DIR)/$(DROPBEAR)					\
+	PROGRAMS="dropbear dropbearkey dbclient scp" -j10			\
+	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1;
+
+	$(MAKE) -C $(PACKAGES_DIR)/$(DROPBEAR)					\
+	PROGRAMS="dropbear dropbearkey dbclient scp" install			\
+	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1;
+
+$(PACKAGES_DIR)/$(DROPBEAR):
+	@echo "Building dropbear..."
+	@wget -q $(DROPBEAR_URL) -O $(PACKAGES_DIR)/dropbear.tar.bz2
+	@tar -xf $(PACKAGES_DIR)/dropbear.tar.bz2 -C $(PACKAGES_DIR)
 
 main_image:
 	@echo "Generating main image..."
@@ -112,7 +139,7 @@ main_image:
 	-d $(PACKAGES_DIR)/linux/arch/arm/boot/zImage				\
 	$(PACKAGES_DIR)/initramfs						\
 	$(PACKAGES_DIR)/linux/arch/arm/boot/dts/am335x-boneblack.dtb		\
-	$(PACKAGES_DIR)/$(IMAGE_NAME)
+	$(PACKAGES_DIR)/$(IMAGE_NAME) >> /dev/null 2>&1;
 
 root:
 	@rsync -aq $(PWD)/rootfs/ $(ROOTFS_DIR)
@@ -131,7 +158,7 @@ initramfs:
 	-a 0x8294f200								\
 	-n "Root Filesystem"							\
 	-d $(PACKAGES_DIR)/initramfs.gz 					\
-	$(PACKAGES_DIR)/initramfs						\
+	$(PACKAGES_DIR)/initramfs >> /dev/null 2>&1;				\
 
 clean:
 	@rm -f $(PACKAGES_DIR)/*.zip
@@ -148,4 +175,3 @@ $(PACKAGES_DIR):
 
 $(LOGS_DIR):
 	@mkdir -p $@
-

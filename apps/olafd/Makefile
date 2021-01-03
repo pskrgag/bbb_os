@@ -19,11 +19,13 @@ $(OLAF_DIR)/$(OUT).o: $(SRCS)
 $(OLAF_DIR):
 	mkdir -p $(OLAF_DIR)
 
-link: $(OLAF_DIR)/$(OUT)
+link: $(OLAF_DIR)/$(OUT) install
 
 $(OLAF_DIR)/$(OUT): $(OLAF_DIR)/$(OUT).o
 	@echo "LD	$@"
 	$(CC) $(OLAF_DIR)/$(OUT).o -o $(OLAF_DIR)/$(OUT) $(LFLAGS)
+
+install:
 	@cp $(OLAF_DIR)/$(OUT) $(ROOTFS_DIR)/bin
 
-.PHONY: clean
+.PHONY: clean install
