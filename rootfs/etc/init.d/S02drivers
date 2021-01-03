@@ -6,6 +6,7 @@
 start() {
 	printf "Loading drivers: "
 	modprobe g_ether
+	modprobe model
 	mkdir -p /dev/pts
 	mount devpts /dev/pts -t devpts
 	echo "OK"
@@ -13,6 +14,7 @@ start() {
 
 stop() {
 	printf "Unloading drivers: "
+	modprobe -r model
 	modprobe -r g_ether
 	echo "OK"
 }

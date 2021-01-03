@@ -13,5 +13,5 @@ CXX_HOST = g++
 CC_HOST = gcc
 
 # For instaling apps and modules
-ROOTFS_DIR = $(PACKAGES_DIR)/rootfs
 PACKAGES_DIR = $(BUILD_DIR)/packages
+ROOTFS_DIR = $(PACKAGES_DIR)/rootfs
