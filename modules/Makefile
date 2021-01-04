@@ -19,7 +19,6 @@ compile: $(MODULES_DIR)
 link: install
 
 install:
-	@echo "Huy $(ROOTFS_DIR)"
 	$(MAKE) INSTALL_MOD_PATH=$(ROOTFS_DIR) -C $(LINUX_SOURCE_DIR) \
 	M=$(MODULES_DIR) modules_install
 
