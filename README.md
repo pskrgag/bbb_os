@@ -1,6 +1,6 @@
 # bbb_os
 
-My first try in embedded linux :////
+My first try in embedded linux ://// (using BeagleBone black)
 
 ## Current dependencies (not builded in this project)
 * libgettextpo-dev
