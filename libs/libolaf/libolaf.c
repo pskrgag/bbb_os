@@ -15,12 +15,12 @@ static ssize_t olaf_send(sock_t socket, olaf_code_t code, const void *arg)
 
 	res = send(socket, &req, sizeof(req), 0);
 	if (res != sizeof(req))
-		return -1;
+		return -errno;
 
 	if (OLAF_COMMAND_PERMS(code) & OLAF_WRITE) {
-		res = send(socket, arg, OLAF_COMMAND_ARGS_SIZE(code), 0);
-		if (res != OLAF_COMMAND_ARGS_SIZE(code))
-			return -1;
+		res = send(socket, arg, OLAF_COMMAND_ARG_SIZE(code), 0);
+		if (res != OLAF_COMMAND_ARG_SIZE(code))
+			return -errno;
 	}
 
 	return 0;
@@ -38,9 +38,9 @@ static ssize_t olaf_recv(sock_t socket, void *arg)
 	req.code = be64toh(req.code);
 
 	if (OLAF_COMMAND_PERMS(req.code) & OLAF_READ) {
-		res = recv(socket, arg, OLAF_COMMAND_ARGS_SIZE(req.code), 0);
-		if (res != OLAF_COMMAND_ARGS_SIZE(req.code))
-			return -3;
+		res = recv(socket, arg, OLAF_COMMAND_ARG_SIZE(req.code), 0);
+		if (res != OLAF_COMMAND_ARG_SIZE(req.code))
+			return -errno;
 	}
 
 	return 0;
@@ -52,7 +52,7 @@ ssize_t olaf_call(sock_t socket, olaf_code_t code, void *arg)
 
 	res = olaf_send(socket, code, arg);
 	if (res)
-		return -1;
+		return res;
 
 	res = olaf_recv(socket, arg);
 	if (res)

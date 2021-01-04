@@ -6,13 +6,14 @@ CFLAGS += -I $(TOPDIR)/include
 LFLAGS += -lpthread
 
 SRCS = $(wildcard *.c)
+HEADERS = $(wildcard *.h)
 OUT = olafd
 
 OLAF_DIR = $(APPS_DIR)/olafd
 
 compile: $(OLAF_DIR) $(OLAF_DIR)/$(OUT).o
 
-$(OLAF_DIR)/$(OUT).o: $(SRCS)
+$(OLAF_DIR)/$(OUT).o: $(SRCS) $(HEADERS)
 	@echo "CC	$@"
 	$(CC) $(CFLAGS) -c $(SRCS) -o $@
 
