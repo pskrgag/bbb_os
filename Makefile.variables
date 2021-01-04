@@ -1,0 +1,17 @@
+# Cross-compile stuff
+ARCH=arm
+TARGET=arm-linux-gnueabihf
+
+# Makefile stuff
+CMDS = compile link
+MAKEFLAGS += --silent
+
+# Bunitils
+CC = $(TARGET)-gcc
+LD = $(TARGET)-ld
+CXX_HOST = g++
+CC_HOST = gcc
+
+# For instaling apps and modules
+PACKAGES_DIR = $(BUILD_DIR)/packages
+ROOTFS_DIR = $(PACKAGES_DIR)/rootfs
