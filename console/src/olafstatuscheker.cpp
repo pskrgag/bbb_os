@@ -67,7 +67,6 @@ QString Net::OlafStatusChecker::get_device_name(QTcpSocket *socket)
 	if (res) {
 		DEBUG_LOG << "Failed to olaf_call" << QString::number(res);
 	}
-
 	DEBUG_LOG << info.name;
 
 	return QString(info.name);
@@ -92,7 +91,6 @@ void Net::OlafStatusChecker::device_keep_alive(QTcpSocket *sock, const QString &
 		if (!sock->flush())
 			break;
 
-		DEBUG_LOG << "res = " << QString::number(res);
 		QThread::sleep(1);
 	}
 

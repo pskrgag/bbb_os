@@ -9,7 +9,6 @@
 #include <bone/system.h>
 #include <bone/api/olaf_api.h>
 #include <bone/ioctl.h>
-#include <bone/api/ioclt.h>
 
 long bone_ioctl(struct file *, unsigned int, unsigned long);
 
@@ -80,6 +79,8 @@ long bone_ioctl(struct file *fl, unsigned int cmd, unsigned long arg)
 	ssize_t res;
 	void *arg_kern;
 
+	pr_err("Im in ioclt\n");
+
 	/* this copy is needed to verify user's pointer */
 	if (copy_from_user(&req, (void *) arg, sizeof(req)))
 		return -EINVAL;
@@ -91,8 +92,10 @@ long bone_ioctl(struct file *fl, unsigned int cmd, unsigned long arg)
 	/* this copy is needed to verify user's pointer */
 	if (OLAF_COMMAND_PERMS(req.code) & OLAF_WRITE) {
 		if (copy_from_user(arg_kern, req.arg,
-		    OLAF_COMMAND_ARGS_SIZE(req.code)))
-			return -EINVAL;
+		    OLAF_COMMAND_ARGS_SIZE(req.code))) {
+			res = -EINVAL;
+			goto end;
+		}
 	}
 
 	switch(cmd) {
@@ -109,12 +112,13 @@ long bone_ioctl(struct file *fl, unsigned int cmd, unsigned long arg)
 
 	if (OLAF_COMMAND_PERMS(req.code) & OLAF_READ) {
 		if (copy_to_user(req.arg, arg_kern,
-		    OLAF_COMMAND_ARGS_SIZE(req.code)))
-			return -EINVAL;
+		    OLAF_COMMAND_ARGS_SIZE(req.code))) {
+			res = -EINVAL;
+			goto end;
+		}
 	}
 
-	res = 0;
-
+	pr_err("Out ioclt\n");
 end:
 	kfree(arg_kern);
 	return res;

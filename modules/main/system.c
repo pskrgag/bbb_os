@@ -20,7 +20,7 @@ static int bone_get_device_info(olaf_code_t code, struct olaf_device_info* arg)
 {
 	strncpy(arg->name, "BeagleBone Black by pskrgag", OLAF_MAX_DEVICE_NAME);
 
-	return 0;
+	return sizeof(*arg);
 }
 
 int bone_disp(olaf_code_t code, void *arg)
