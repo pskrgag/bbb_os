@@ -44,7 +44,6 @@ static inline int olaf_get_request(sock_t sock, struct olaf_request *req)
 	}
 
 	req->code = be64toh(req->code);
-	log_err("Got code = %llu. GET_NAME_CODE = %llu suka???\n", req->code, OLAF_GET_DEVICE_INFO);
 
 	return 0;
 }
@@ -145,10 +144,7 @@ static ssize_t olaf_kernel(olaf_code_t code, void *arg)
 	req.code = code;
 	req.arg = arg;
 
-	/* res = ioctl(fd, BONE_DEV, &req);*/
-
-	res = 50;
-	log_err("res = %d ??\n", res);
+	res = ioctl(fd, BONE_DEV, &req);
 
 	close(fd);
 	return res;
@@ -180,7 +176,7 @@ static inline int pre_connection(sock_t socket)
 
 		return OLAF_LOGGED;
 	case OLAF_GET_DEVICE_INFO:
-		ptr = malloc(sizeof(OLAF_COMMAND_ARGS_SIZE(req.code)));
+		ptr = malloc(OLAF_COMMAND_ARG_SIZE(req.code));
 
 		if (!ptr)
 			return OLAF_PRE_ERROR;
@@ -189,7 +185,6 @@ static inline int pre_connection(sock_t socket)
 		if (size < 0)
 			goto error;
 
-		log_err("wtf\n");
 		ret_res = OLAF_GOT_NAME;
 		break;
 	default:
@@ -210,8 +205,6 @@ static inline int pre_connection(sock_t socket)
 
 	if (res != OLAF_PRE_ERROR)
 		res = ret_res;
-
-	log_err("res = %d\n",res);
 
 error:
 	free(ptr);

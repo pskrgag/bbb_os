@@ -30,7 +30,7 @@ void Net::OlafStatusChecker::ping()
 
 			socket->connectToHost(current_ip, BoarPort);
 
-			if (socket->waitForConnected(10)) {
+			if (socket->waitForConnected(30)) {
 				name = get_device_name(socket);
 
 				if (name.size() == 0)
@@ -67,7 +67,7 @@ QString Net::OlafStatusChecker::get_device_name(QTcpSocket *socket)
 	if (res) {
 		DEBUG_LOG << "Failed to olaf_call" << QString::number(res);
 	}
-	DEBUG_LOG << info.name;
+	DEBUG_LOG << "suka + " << info.name;
 
 	return QString(info.name);
 }

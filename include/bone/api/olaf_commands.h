@@ -35,7 +35,7 @@ struct olaf_packet {
 #define __OLAF_COMMAND(id, arg_size, perms)	((uint64_t) (id | (arg_size << 8) | ( (uint64_t) perms << 40)))
 #define OLAF_COMMAND(id, type, perms)		__OLAF_COMMAND(id, sizeof(type), perms)
 
-#define OLAF_COMMAND_ARGS_SIZE(command)		((command >> 8) & 0xffffffff)
+#define OLAF_COMMAND_ARG_SIZE(command)		((command >> 8) & 0xffffffff)
 #define OLAF_COMMAND_PERMS(command)		(command >> 40)
 
 #define OLAF_WRONG_CODE				(~0ull)
