@@ -31,7 +31,7 @@ struct olaf_login_args {
 
 /* ----------------------------------------------------------------------------------- */
 
-#define OLAF_MAX_DEVICE_NAME		20
+#define OLAF_MAX_DEVICE_NAME		50
 
 struct olaf_device_info {
 	char name[OLAF_MAX_DEVICE_NAME];

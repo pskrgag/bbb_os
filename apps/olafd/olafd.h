@@ -8,16 +8,24 @@
 #include <stdio.h>
 #include <endian.h>
 #include <netinet/tcp.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
+#include <bone/ioctl.h>
 
 /* Constants */
 #define DEFAULT_PORT		1234
 #define IP			"192.168.7.2"
-#define HOST_IP			"192.168.7.1"		/* over usb0 interface */
+#define HOST_IP			"192.168.7.1"		/* over eth0 interface */
 #define OLAF_FILE(file)		"/etc/olaf/" file
 
 /* log macros */
 #define log(level, format...)	syslog(level, format)
 #define log_err(format...)	syslog(LOG_ERR, format)
+
+/* model module node */
+#define BONE_NODE		"/dev/bone"
 
 #ifdef DEBUG
 #define DBG(...)	log(LOG_ERR, __VA_ARGS__)
@@ -36,7 +44,6 @@ static inline int olaf_get_request(sock_t sock, struct olaf_request *req)
 	}
 
 	req->code = be64toh(req->code);
-	log_err("Got code = %llu. GET_NAME_CODE = %llu\n", req->code, OLAF_GET_DEVICE_INFO);
 
 	return 0;
 }
@@ -119,19 +126,28 @@ static int olaf_login(sock_t socket)
 
 	res = recv(socket, &args, sizeof(args), 0);
 	if (res != sizeof(args)) {
-		log_err("Errno = %s\n", strerror(errno));
 		return -1;
 	}
 
 	return olaf_check_login(&args);
 }
 
-static inline size_t olaf_get_name(sock_t socket, const struct olaf_request *req, struct olaf_device_info *info)
+static ssize_t olaf_kernel(olaf_code_t code, void *arg)
 {
-	memset(info, 0, sizeof(info));
-	strcpy(info->name, "BeagleBone Black");
+	int fd, res;
+	struct bone_request req;
 
-	return sizeof(struct olaf_device_info);
+	fd = open(BONE_NODE, O_RDWR);
+	if (fd < 0)
+		return -EIO;
+
+	req.code = code;
+	req.arg = arg;
+
+	res = ioctl(fd, BONE_DEV, &req);
+
+	close(fd);
+	return res;
 }
 
 #define OLAF_PRE_ERROR		-1
@@ -146,7 +162,7 @@ static inline int pre_connection(sock_t socket)
 	size_t size = 0;
 
 	res = olaf_get_request(socket, &req);
-	if (res || req.code == OLAF_WRONG_CODE)
+	if (res)
 		goto error;
 
 	/* only these commands can be first commands send by user */
@@ -160,14 +176,19 @@ static inline int pre_connection(sock_t socket)
 
 		return OLAF_LOGGED;
 	case OLAF_GET_DEVICE_INFO:
-		ptr = malloc(sizeof(struct olaf_device_info));
+		ptr = malloc(OLAF_COMMAND_ARG_SIZE(req.code));
 
 		if (!ptr)
 			return OLAF_PRE_ERROR;
 
-		size = olaf_get_name(socket, &req, ptr);
+		size = olaf_kernel(req.code, ptr);
+		if (size < 0)
+			goto error;
 
 		ret_res = OLAF_GOT_NAME;
+		break;
+	default:
+		return -EINVAL;
 	}
 
 	req.code = htobe64(req.code);
@@ -196,9 +217,8 @@ static inline int olaf_keep_alive(sock_t socket)
 	int res;
 
 	while (1) {
-		res = recv(socket, &__recv, sizeof(uint64_t), 0);
-		log_err("res = %d", res);
-		if (res != sizeof(OLAF_KEEP_ALIVE))
+		res = recv(socket, &__recv, sizeof(__recv), 0);
+		if (res != sizeof(__recv))
 			return 0;
 	}
 }

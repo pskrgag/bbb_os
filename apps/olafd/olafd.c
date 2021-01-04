@@ -10,7 +10,7 @@
 #include <bone/api/olaf_api.h>
 #include "olafd.h"
 
-static void *__attribute__((noreturn)) user_main(void *data)
+static void *user_main(void *data)
 {
 	sock_t socket = (sock_t) data;
 	olaf_code_t code;
@@ -28,6 +28,7 @@ static void *__attribute__((noreturn)) user_main(void *data)
 		olaf_keep_alive(socket);
 		goto error;
 	case OLAF_PRE_ERROR:
+		log_err("Pre error\n");
 		goto error;
 	}
 
@@ -35,9 +36,9 @@ static void *__attribute__((noreturn)) user_main(void *data)
 		
 	}
 error:
-	log_err("Pre error\n");
+	log_err("Killing thread\n");
 	close(socket);
-	pthread_exit(NULL);
+	return NULL;
 }
 
 static void __attribute__((noreturn)) olaf_main(sock_t master)
@@ -48,8 +49,6 @@ static void __attribute__((noreturn)) olaf_main(sock_t master)
 	int res;
 
 	while (1) {
-		log_err("Waiting for connection\n");
-
 		new_conn = accept(master, NULL, NULL);
 		if (new_conn < 0) {
 			log_err("Failed to accept new connection");
@@ -69,6 +68,7 @@ static void __attribute__((noreturn)) olaf_main(sock_t master)
 		}
 
 		pthread_create(&user_thread, NULL, user_main, (void *) new_conn);
+		pthread_detach(user_thread);
 
 		log_err("Accepted new connection\n");
 		continue;

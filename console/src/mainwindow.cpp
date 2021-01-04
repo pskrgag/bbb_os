@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 
-#define DEVICE_IMG_PATH			"/home/pskrgag/Pictures/1.png"		/* TODO: make this picture part of the project */
-#define INFO_IMG_PATH			"/home/pskrgag/Pictures/2.png"		/* TODO: make this picture part of the project */
-#define ERROR_IMG_PATH			"/home/pskrgag/Pictures/3.png"		/* TODO: make this picture part of the project */
+#define DEVICE_IMG_PATH			"1.png"		/* TODO: make this picture part of the project */
+#define INFO_IMG_PATH			"2.png"		/* TODO: make this picture part of the project */
+#define ERROR_IMG_PATH			"3.png"		/* TODO: make this picture part of the project */
 
 static inline QString device_info_to_ip(const QString &info)
 {
