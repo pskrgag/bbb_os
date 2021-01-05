@@ -4,8 +4,8 @@
 # executing them in numerical order.
 #
 
-mkdir /proc
-mount -t proc proc/ proc/
+mkdir -p /dev/pts
+mount -a
 
 for i in /etc/init.d/S??* ;do
 
