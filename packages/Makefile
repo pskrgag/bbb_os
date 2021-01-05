@@ -75,6 +75,8 @@ $(LOGS_DIR)/$(BUSYBOX).d: | $(PACKAGES_DIR)/$(BUSYBOX) $(ROOTFS_DIR)
 		CONFIG_PREFIX=$(PACKAGES_DIR)/rootfs				\
 		>> $(LOGS_DIR)/$(BUSYBOX).d 2>&1
 
+	@chmod +s $(ROOTFS_DIR)/bin/busybox
+
 $(PACKAGES_DIR)/$(BUSYBOX):
 	@echo "Building busybox..."
 	@wget -q $(BUSYBOX_USL) -O $(PACKAGES_DIR)/busybox.tar.bz2
