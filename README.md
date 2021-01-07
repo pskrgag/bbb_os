@@ -7,4 +7,5 @@ My first try in embedded linux ://// (using BeagleBone black)
 * arm-linux-gnuebihf 7.5
 * u-boot-tools
 * u-boot (builded once and does not change)
-* glibc dependencie
+* glibc dependencies
+* sparse

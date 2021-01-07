@@ -80,7 +80,7 @@ long bone_ioctl(struct file *fl, unsigned int cmd, unsigned long arg)
 	void *arg_kern;
 
 	/* this copy is needed to verify user's pointer */
-	if (copy_from_user(&req, (void *) arg, sizeof(req)))
+	if (copy_from_user(&req, (void __user *) arg, sizeof(req)))
 		return -EINVAL;
 
 	arg_kern = kmalloc(OLAF_COMMAND_ARG_SIZE(req.code), GFP_KERNEL);
