@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 
-#define DEVICE_IMG_PATH			"1.png"		/* TODO: make this picture part of the project */
-#define INFO_IMG_PATH			"2.png"		/* TODO: make this picture part of the project */
-#define ERROR_IMG_PATH			"3.png"		/* TODO: make this picture part of the project */
+#define DEVICE_IMG_PATH			"1.png"
+#define INFO_IMG_PATH			"2.png"
+#define ERROR_IMG_PATH			"3.png"
 
 static inline QString device_info_to_ip(const QString &info)
 {
@@ -22,12 +22,17 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	avail_devices(new QListWidget(this)),
 	device_state(new QWidget(this)),
 	console_logger(new QListWidget(this)),
+	rigth_box(new QVBoxLayout(this)),
+	rigth_widget(new QWidget(this)),
+	buttons(new QWidget(this)),
+	ssh_button(new QPushButton("SSH", this)),
+	buttons_layout(new QHBoxLayout(this)),
 	icons_map({{INFO, INFO_IMG_PATH}, {ERROR, ERROR_IMG_PATH}})
 {
-	/* Connect pinger to MainWindow */
 	connect(pinger, &Net::OlafStatusChecker::found_device, this, &Gui::MainWindow::new_device_found);
 	connect(avail_devices, &QListWidget::customContextMenuRequested, this, &Gui::MainWindow::device_clicked);
 	connect(pinger, &Net::OlafStatusChecker::device_died, this, &Gui::MainWindow::remove_device);
+	connect(ssh_button, &QPushButton::clicked, this, &Gui::MainWindow::ssh_connect);
 
 	pinger->moveToThread(&pinger_thread);
 
@@ -37,9 +42,18 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 
 	/* widgets set up */
 	device_state->setStyleSheet("background-color: blue");
+	rigth_box->addWidget(avail_devices, Qt::AlignBottom);
+	rigth_box->addWidget(buttons, Qt::AlignTop);
+	rigth_box->setStretch(1, 3);
+
+	buttons_layout->addWidget(ssh_button, Qt::AlignCenter);
+	buttons_layout->setStretch(0, 0);
+	buttons->setLayout(buttons_layout);
+
+	rigth_widget->setLayout(rigth_box);
 
 	/* splitters set up */
-	addWidget(avail_devices);
+	addWidget(rigth_widget);
 	addWidget(vertical_splitter);
 
 	vertical_splitter->addWidget(device_state);
@@ -118,4 +132,17 @@ void Gui::MainWindow::connect_to_device(QListWidgetItem *item)
 {
 	DEBUG_LOG << "Connecting to device " + device_info_to_ip(item->text());
 	item->setForeground(Qt::red);
+}
+
+void Gui::MainWindow::ssh_connect()
+{
+	QListWidgetItem *item;
+	QProcess process;
+
+	item = avail_devices->currentItem();
+	if (!item)
+		return;
+
+	process.start("x-terminal-emulator -e \"ssh -l root 192.168.7.2\"");
+	process.waitForFinished();
 }
