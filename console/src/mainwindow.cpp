@@ -33,6 +33,8 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	connect(avail_devices, &QListWidget::customContextMenuRequested, this, &Gui::MainWindow::device_clicked);
 	connect(pinger, &Net::OlafStatusChecker::device_died, this, &Gui::MainWindow::remove_device);
 	connect(ssh_button, &QPushButton::clicked, this, &Gui::MainWindow::ssh_connect);
+	connect(this, &Gui::MainWindow::device_disconnected, pinger, &Net::OlafStatusChecker::device_disconnected, Qt::DirectConnection);
+	connect(pinger, &Net::OlafStatusChecker::failed_to_get_name, this, &Gui::MainWindow::call_error);
 
 	pinger->moveToThread(&pinger_thread);
 
@@ -85,6 +87,8 @@ void Gui::MainWindow::remove_device(const QString &name)
 
 	if (!list.size())
 		return;
+
+	device_disconnected(*(--list[0]->text().toStdString().end()) - '0');
 
 	avail_devices->removeItemWidget(list[0]);
 	delete list[0];
@@ -143,6 +147,11 @@ void Gui::MainWindow::ssh_connect()
 	if (!item)
 		return;
 
-	process.start("x-terminal-emulator -e \"ssh -l root 192.168.7.2\"");
+	process.start("x-terminal-emulator -e \"ssh -i id_rsa.pub -l root 192.168.7.2\"");
 	process.waitForFinished();
+}
+
+void Gui::MainWindow::call_error(const QString &err)
+{
+	add_new_event("Failed to olaf_call: ", Gui::ERROR);
 }

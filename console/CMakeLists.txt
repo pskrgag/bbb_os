@@ -6,5 +6,5 @@ set(INSTALL_DIR ~/console)
 
 add_subdirectory(src)
 
-file(GLOB PNGS "${CMAKE_CURRENT_SOURCE_DIR}/docs/*.png")
+file(GLOB PNGS "${CMAKE_CURRENT_SOURCE_DIR}/docs/*")
 file(COPY ${PNGS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/src)

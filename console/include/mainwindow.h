@@ -55,9 +55,12 @@ private:
 private slots:
 	void connect_to_device(QListWidgetItem *item);
 	void remove_device(const QString &);
+	void call_error(const QString &);
 public slots:
 	void new_device_found(const QString &, const QString &);
 	void device_clicked(const QPoint &);
+signals:
+	void device_disconnected(int i);
 };
 
 } /* Gui namespace */

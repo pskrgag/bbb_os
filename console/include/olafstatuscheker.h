@@ -33,10 +33,12 @@ public:
 
 public slots:
 	void ping();
+	void device_disconnected(int i);
 
 signals:
 	void found_device(const QString &, const QString &);
 	void device_died(const QString &);
+	void failed_to_get_name(const QString &);
 };
 
 } /* namespace Net */
