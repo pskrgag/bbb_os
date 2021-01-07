@@ -6,7 +6,7 @@
 
 struct bone_request {
 	olaf_code_t code;
-	void *arg;
+	void __user *arg;
 };
 
 #define BONE_DEV	_IOW('D', 0, struct bone_request)

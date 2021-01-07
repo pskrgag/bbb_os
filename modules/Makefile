@@ -14,7 +14,7 @@ EXTRA_CFLAGS = -I $(PWD)/include
 
 compile: $(MODULES_DIR)
 	cp -r * $(MODULES_DIR)
-	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=arm-linux-gnueabihf- -C $(LINUX_SOURCE_DIR) M=$(MODULES_DIR) modules
+	$(MAKE) C=1 ARCH=$(ARCH) CROSS_COMPILE=arm-linux-gnueabihf- -C $(LINUX_SOURCE_DIR) M=$(MODULES_DIR) modules
 
 link: install
 

@@ -95,9 +95,10 @@ $(LOGS_DIR)/$(GLIBC).d: $(PACKAGES_DIR)/$(GLIBC)
 	--disable-nls								\
 	--disable-multi-arch							\
 	--disable-werror							\
-	--disable-java								\
-	--disable-native-java >> $(LOGS_DIR)/$(GLIBC).d 2>&1;		\
-	$(MAKE) -j10 >> $(LOGS_DIR)/$(GLIBC).d 2>&1;			\
+	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;						\
+	
+	$(MAKE) -j10 >> $(LOGS_DIR)/$(GLIBC).d 2>&1;				\
+	
 	$(MAKE) install install_root=$(ROOTFS_DIR)				\
 	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;
 
