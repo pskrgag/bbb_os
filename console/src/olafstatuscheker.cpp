@@ -67,7 +67,6 @@ QString Net::OlafStatusChecker::get_device_name(QTcpSocket *socket)
 	if (res) {
 		DEBUG_LOG << "Failed to olaf_call" << QString::number(res);
 	}
-	DEBUG_LOG << "suka + " << info.name;
 
 	return QString(info.name);
 }

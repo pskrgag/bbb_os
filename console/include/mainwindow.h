@@ -9,6 +9,9 @@
 #include <QThread>
 #include <QHBoxLayout>
 #include <QMenu>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
 
 #include <new>
 #include <algorithm>
@@ -35,6 +38,7 @@ public:
 	~MainWindow();
 
 	void add_new_event(const QString &, Gui::EventLevels);
+	void ssh_connect(void);
 private:
 	Net::OlafStatusChecker *pinger;
 	QSplitter *vertical_splitter;
@@ -42,6 +46,11 @@ private:
 	QWidget *device_state;
 	QListWidget *console_logger;
 	QThread pinger_thread;
+	QVBoxLayout *rigth_box;
+	QWidget *rigth_widget;
+	QWidget *buttons;
+	QPushButton *ssh_button;
+	QHBoxLayout *buttons_layout;
 	const QMap<EventLevels, QString> icons_map;
 private slots:
 	void connect_to_device(QListWidgetItem *item);
