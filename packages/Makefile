@@ -95,12 +95,14 @@ $(LOGS_DIR)/$(GLIBC).d: $(PACKAGES_DIR)/$(GLIBC)
 	--disable-nls								\
 	--disable-multi-arch							\
 	--disable-werror							\
+	>> $(LOGS_DIR)/$(GLIBC).d 2>&1						\
+	
+	$(MAKE) -C $(PACKAGES_DIR)/glibc_build -j10				\
 	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;						\
 	
-	$(MAKE) -j10 >> $(LOGS_DIR)/$(GLIBC).d 2>&1;				\
-	
-	$(MAKE) install install_root=$(ROOTFS_DIR)				\
-	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;
+	$(MAKE) -C $(PACKAGES_DIR)/glibc_build					\
+	install install_root=$(ROOTFS_DIR)					\
+	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;						\
 
 $(PACKAGES_DIR)/$(GLIBC):
 	@echo "Building glibc..."

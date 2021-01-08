@@ -10,7 +10,7 @@ all: $(BUILD_DIR) $(SUBDIRS) $(CMDS)
 
 $(CMDS):
 	for dir in $(SUBDIRS); do \
-		$(MAKE) -s -C $$dir $@ BUILD_DIR=$(BUILD_DIR); \
+		$(MAKE) -s -C $$dir $@ BUILD_DIR=$(BUILD_DIR) || exit; \
 	done
 
 $(BUILD_DIR):
