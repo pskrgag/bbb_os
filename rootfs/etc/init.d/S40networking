@@ -6,7 +6,7 @@
 case "$1" in
 	start)
 		echo "Starting network..."
-		/sbin/ifup -a
+		/sbin/ifup -fa
 		start-stop-daemon -b -S -q -m -p /var/run/dropbear.pid --exec /sbin/dropbear
 		;;
 	stop)
