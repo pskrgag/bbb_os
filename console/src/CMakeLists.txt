@@ -4,8 +4,9 @@ set(INCLUDE_DIR ../include)
 
 add_executable(${PROJECT_NAME} console.cpp
                                mainwindow.cpp ${INCLUDE_DIR}/mainwindow.h
-                               olafstatuscheker.cpp ${INCLUDE_DIR}/olafstatuscheker.h
+                               olafpinger.cpp ${INCLUDE_DIR}/olafpinger.h
                                olafclient.cpp ${INCLUDE_DIR}/olafclient.h
+                               olafstatuscheker.cpp ${INCLUDE_DIR}/olafstatuscheker.h
                                )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC ON)
