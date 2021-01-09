@@ -163,7 +163,7 @@ void Gui::MainWindow::uart_connect()
 {
 	QProcess process;
 
-	process.start(QString("x-terminal-emulator -e \"") + QString("/bin/echo -ne '#!/usr/bin/env sh\nzenity --password --title=Password\n' > ") + QString(PASSWD_SCRIPT_NAME) +
+	process.start(QString("sh -c \"") + QString("/bin/echo -ne '#!/usr/bin/env sh\nzenity --password --title=Password\n' > ") + QString(PASSWD_SCRIPT_NAME) +
 		      QString(" && chmod +x ") + QString(PASSWD_SCRIPT_NAME) + QString("\""));
 	process.waitForFinished();
 
