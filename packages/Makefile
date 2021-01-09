@@ -121,11 +121,11 @@ $(LOGS_DIR)/$(DROPBEAR).d: | $(PACKAGES_DIR)/$(DROPBEAR)
 	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1
 
 	$(MAKE) -C $(PACKAGES_DIR)/$(DROPBEAR)					\
-	PROGRAMS="dropbear dropbearkey dbclient scp" -j10			\
+	PROGRAMS="dropbear" -j10						\
 	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1;
 
 	$(MAKE) -C $(PACKAGES_DIR)/$(DROPBEAR)					\
-	PROGRAMS="dropbear dropbearkey dbclient scp" install			\
+	PROGRAMS="dropbear" install						\
 	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1;
 
 $(PACKAGES_DIR)/$(DROPBEAR):
