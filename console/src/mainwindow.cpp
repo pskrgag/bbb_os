@@ -4,6 +4,8 @@
 #define INFO_IMG_PATH			"2.png"
 #define ERROR_IMG_PATH			"3.png"
 
+#define PASSWD_SCRIPT_NAME		"passwd.sh"
+
 static inline QString device_info_to_ip(const QString &info)
 {
 	::strtok(const_cast<char *>(info.toStdString().data()), ":");
@@ -26,16 +28,20 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	rigth_widget(new QWidget(this)),
 	buttons(new QWidget(this)),
 	ssh_button(new QPushButton("SSH", this)),
+	uart_button(new QPushButton("UART", this)),
 	buttons_layout(new QHBoxLayout(this)),
 	icons_map({{INFO, INFO_IMG_PATH}, {ERROR, ERROR_IMG_PATH}})
 {
 	connect(pinger, &Net::OlafPinger::found_device, this, &Gui::MainWindow::new_device_found);
-	connect(avail_devices, &QListWidget::customContextMenuRequested, this, &Gui::MainWindow::device_clicked);
 	connect(pinger, &Net::OlafPinger::device_died, this, &Gui::MainWindow::remove_device);
 	connect(pinger, &Net::OlafPinger::device_not_responding, this, &Gui::MainWindow::device_not_responding);
-	connect(ssh_button, &QPushButton::clicked, this, &Gui::MainWindow::ssh_connect);
-	connect(this, &Gui::MainWindow::device_disconnected, pinger, &Net::OlafPinger::device_disconnected, Qt::DirectConnection);
 	connect(pinger, &Net::OlafPinger::failed_to_get_name, this, &Gui::MainWindow::call_error);
+
+	connect(this, &Gui::MainWindow::device_disconnected, pinger, &Net::OlafPinger::device_disconnected, Qt::DirectConnection);
+	connect(avail_devices, &QListWidget::customContextMenuRequested, this, &Gui::MainWindow::device_clicked);
+
+	connect(ssh_button, &QPushButton::clicked, this, &Gui::MainWindow::ssh_connect);
+	connect(uart_button, &QPushButton::clicked, this, &Gui::MainWindow::uart_connect);
 
 	pinger->moveToThread(&pinger_thread);
 
@@ -49,7 +55,8 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	rigth_box->addWidget(buttons, Qt::AlignTop);
 	rigth_box->setStretch(1, 3);
 
-	buttons_layout->addWidget(ssh_button, Qt::AlignCenter);
+	buttons_layout->addWidget(uart_button, Qt::AlignRight);
+	buttons_layout->addWidget(ssh_button, Qt::AlignLeft);
 	buttons_layout->setStretch(0, 0);
 	buttons->setLayout(buttons_layout);
 
@@ -149,6 +156,18 @@ void Gui::MainWindow::ssh_connect()
 		return;
 
 	process.start("x-terminal-emulator -e \"ssh -i id_rsa.pub -l root 192.168.7.2\"");
+	process.waitForFinished();
+}
+
+void Gui::MainWindow::uart_connect()
+{
+	QProcess process;
+
+	process.start(QString("x-terminal-emulator -e \"") + QString("/bin/echo -ne '#!/usr/bin/env sh\nzenity --password --title=Password\n' > ") + QString(PASSWD_SCRIPT_NAME) +
+		      QString(" && chmod +x ") + QString(PASSWD_SCRIPT_NAME) + QString("\""));
+	process.waitForFinished();
+
+	process.start("x-terminal-emulator -e \"SUDO_ASKPASS='" + QDir::currentPath() + "/" + PASSWD_SCRIPT_NAME + "' sudo -A minicom\"");
 	process.waitForFinished();
 }
 

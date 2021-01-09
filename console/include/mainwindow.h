@@ -39,6 +39,7 @@ public:
 
 	void add_new_event(const QString &, Gui::EventLevels);
 	void ssh_connect(void);
+	void uart_connect(void);
 private:
 	Net::OlafPinger *pinger;
 	QSplitter *vertical_splitter;
@@ -50,6 +51,7 @@ private:
 	QWidget *rigth_widget;
 	QWidget *buttons;
 	QPushButton *ssh_button;
+	QPushButton *uart_button;
 	QHBoxLayout *buttons_layout;
 	const QMap<EventLevels, QString> icons_map;
 private slots:
