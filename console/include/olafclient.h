@@ -15,11 +15,6 @@ class OlafClient : public QObject
 public:
 	OlafClient(const QString &);
 	~OlafClient();
-
-signals:
-
-public slots:
-
 };
 
 

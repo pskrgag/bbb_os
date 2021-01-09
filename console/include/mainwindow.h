@@ -18,7 +18,7 @@
 #include <cstring>
 
 #include "debug.h"
-#include "olafstatuscheker.h"
+#include "olafpinger.h"
 #include "olafclient.h"
 
 namespace Gui {
@@ -40,7 +40,7 @@ public:
 	void add_new_event(const QString &, Gui::EventLevels);
 	void ssh_connect(void);
 private:
-	Net::OlafStatusChecker *pinger;
+	Net::OlafPinger *pinger;
 	QSplitter *vertical_splitter;
 	QListWidget *avail_devices;
 	QWidget *device_state;
@@ -54,10 +54,14 @@ private:
 	const QMap<EventLevels, QString> icons_map;
 private slots:
 	void connect_to_device(QListWidgetItem *item);
-	void remove_device(const QString &);
+	void call_error(const QString &);
 public slots:
 	void new_device_found(const QString &, const QString &);
 	void device_clicked(const QPoint &);
+	void remove_device(const QString &);
+	void device_not_responding(const QString &);
+signals:
+	void device_disconnected(int i);
 };
 
 } /* Gui namespace */

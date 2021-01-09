@@ -17,7 +17,7 @@ static inline QString device_info_to_name(const QString &info)
 
 Gui::MainWindow::MainWindow(QWidget *parent):
 	QSplitter(Qt::Horizontal, parent),
-	pinger(new Net::OlafStatusChecker),
+	pinger(new Net::OlafPinger),
 	vertical_splitter(new QSplitter(Qt::Vertical)),
 	avail_devices(new QListWidget(this)),
 	device_state(new QWidget(this)),
@@ -29,15 +29,18 @@ Gui::MainWindow::MainWindow(QWidget *parent):
 	buttons_layout(new QHBoxLayout(this)),
 	icons_map({{INFO, INFO_IMG_PATH}, {ERROR, ERROR_IMG_PATH}})
 {
-	connect(pinger, &Net::OlafStatusChecker::found_device, this, &Gui::MainWindow::new_device_found);
+	connect(pinger, &Net::OlafPinger::found_device, this, &Gui::MainWindow::new_device_found);
 	connect(avail_devices, &QListWidget::customContextMenuRequested, this, &Gui::MainWindow::device_clicked);
-	connect(pinger, &Net::OlafStatusChecker::device_died, this, &Gui::MainWindow::remove_device);
+	connect(pinger, &Net::OlafPinger::device_died, this, &Gui::MainWindow::remove_device);
+	connect(pinger, &Net::OlafPinger::device_not_responding, this, &Gui::MainWindow::device_not_responding);
 	connect(ssh_button, &QPushButton::clicked, this, &Gui::MainWindow::ssh_connect);
+	connect(this, &Gui::MainWindow::device_disconnected, pinger, &Net::OlafPinger::device_disconnected, Qt::DirectConnection);
+	connect(pinger, &Net::OlafPinger::failed_to_get_name, this, &Gui::MainWindow::call_error);
 
 	pinger->moveToThread(&pinger_thread);
 
 	/* Start ping routine */
-	connect(&pinger_thread, &QThread::started, pinger, &Net::OlafStatusChecker::ping);
+	connect(&pinger_thread, &QThread::started, pinger, &Net::OlafPinger::ping);
 	pinger_thread.start();
 
 	/* widgets set up */
@@ -85,6 +88,8 @@ void Gui::MainWindow::remove_device(const QString &name)
 
 	if (!list.size())
 		return;
+
+	device_disconnected(*(--list[0]->text().toStdString().end()) - '0');
 
 	avail_devices->removeItemWidget(list[0]);
 	delete list[0];
@@ -143,6 +148,21 @@ void Gui::MainWindow::ssh_connect()
 	if (!item)
 		return;
 
-	process.start("x-terminal-emulator -e \"ssh -l root 192.168.7.2\"");
+	process.start("x-terminal-emulator -e \"ssh -i id_rsa.pub -l root 192.168.7.2\"");
 	process.waitForFinished();
+}
+
+void Gui::MainWindow::call_error(const QString &err)
+{
+	add_new_event("Failed to olaf_call: ", Gui::ERROR);
+}
+
+void Gui::MainWindow::device_not_responding(const QString &name)
+{
+	QList<QListWidgetItem *> list = avail_devices->findItems(name, Qt::MatchContains);
+
+	if (!list.size())
+		return;
+
+	list[0]->setForeground(Qt::gray);
 }
