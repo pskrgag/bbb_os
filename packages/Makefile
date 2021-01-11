@@ -11,9 +11,9 @@ LOADADDR = 0x82000000
 IMAGE_NAME = image.img
 
 compile: $(LOGS_DIR) $(PACKAGES_DIR) $(PACKAGES)
-link: root initramfs main_image clean
+link: $(ROOTFS_DIR) root initramfs main_image clean
 
-.PHONY: root initramfs main_image
+.PHONY: root initramfs main_image $(ROOTFS_DIR)
 
 BUSYBOX = busybox-1.32.1
 GLIBC = glibc-2.26
@@ -42,14 +42,17 @@ $(LOGS_DIR)/linux.d: $(PACKAGES_DIR)/linux
 
 $(PACKAGES_DIR)/linux:
 	@echo "Building linux..."
-	@wget -q $(LINUX_URL) -O $(PACKAGES_DIR)/linux.zip
-	@unzip $(PACKAGES_DIR)/linux.zip -d $(PACKAGES_DIR) > /dev/null 2>&1
-	@mv $(PACKAGES_DIR)/linux-4.14 $(PACKAGES_DIR)/linux
+	@git -q -C $(PACKAGES_DIR) clone https://github.com/beagleboard/linux.git
+	@git --git-dir $@ checkout 5.4
 	@cp linux.config $(PACKAGES_DIR)/linux/.config
+#	@wget -q $(LINUX_URL) -O $(PACKAGES_DIR)/linux.zip
+#	@unzip $(PACKAGES_DIR)/linux.zip -d $(PACKAGES_DIR) > /dev/null 2>&1
+#	@mv $(PACKAGES_DIR)/linux-4.14 $(PACKAGES_DIR)/linux
+#	@cp linux.config $(PACKAGES_DIR)/linux/.config
 
 # busybox
 
-$(LOGS_DIR)/$(BUSYBOX).d: | $(PACKAGES_DIR)/$(BUSYBOX) $(ROOTFS_DIR)
+$(LOGS_DIR)/$(BUSYBOX).d: | $(PACKAGES_DIR)/$(BUSYBOX)
 	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
 		ARCH=$(ARCH)							\
 		CROSS_COMPILE=$(TARGET)-					\
@@ -67,15 +70,6 @@ $(LOGS_DIR)/$(BUSYBOX).d: | $(PACKAGES_DIR)/$(BUSYBOX) $(ROOTFS_DIR)
 		CROSS_COMPILE=$(TARGET)-					\
 		-j10								\
 		>> $(LOGS_DIR)/$(BUSYBOX).d 2>&1
-
-	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
-		ARCH=$(ARCH)							\
-		CROSS_COMPILE=$(TARGET)-					\
-		install								\
-		CONFIG_PREFIX=$(PACKAGES_DIR)/rootfs				\
-		>> $(LOGS_DIR)/$(BUSYBOX).d 2>&1
-
-	@chmod +s $(ROOTFS_DIR)/bin/busybox
 
 $(PACKAGES_DIR)/$(BUSYBOX):
 	@echo "Building busybox..."
@@ -99,10 +93,6 @@ $(LOGS_DIR)/$(GLIBC).d: $(PACKAGES_DIR)/$(GLIBC)
 	
 	$(MAKE) -C $(PACKAGES_DIR)/glibc_build -j10				\
 	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;						\
-	
-	$(MAKE) -C $(PACKAGES_DIR)/glibc_build					\
-	install install_root=$(ROOTFS_DIR)					\
-	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;						\
 
 $(PACKAGES_DIR)/$(GLIBC):
 	@echo "Building glibc..."
@@ -122,10 +112,6 @@ $(LOGS_DIR)/$(DROPBEAR).d: | $(PACKAGES_DIR)/$(DROPBEAR)
 
 	$(MAKE) -C $(PACKAGES_DIR)/$(DROPBEAR)					\
 	PROGRAMS="dropbear" -j10						\
-	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1;
-
-	$(MAKE) -C $(PACKAGES_DIR)/$(DROPBEAR)					\
-	PROGRAMS="dropbear" install						\
 	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1;
 
 $(PACKAGES_DIR)/$(DROPBEAR):
@@ -173,7 +159,26 @@ clean:
 	@rm -f $(PACKAGES_DIR)/*.cpio
 
 $(ROOTFS_DIR):
+	@echo "Generating rootfs..."
+	@rm -r -f $(ROOTFS_DIR)
 	@mkdir -p $@
+
+	$(MAKE) -s -C $(PACKAGES_DIR)/$(BUSYBOX)				\
+	ARCH=$(ARCH)								\
+	CROSS_COMPILE=$(TARGET)-						\
+	install									\
+	CONFIG_PREFIX=$(PACKAGES_DIR)/rootfs					\
+	>> $(LOGS_DIR)/$(BUSYBOX).d 2>&1
+
+	@chmod +s $(ROOTFS_DIR)/bin/busybox
+
+	$(MAKE) -C $(PACKAGES_DIR)/glibc_build					\
+	install install_root=$(ROOTFS_DIR)					\
+	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;						\
+
+	$(MAKE) -C $(PACKAGES_DIR)/$(DROPBEAR)					\
+	PROGRAMS="dropbear" install						\
+	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1;
 
 $(PACKAGES_DIR):
 	@mkdir -p $@

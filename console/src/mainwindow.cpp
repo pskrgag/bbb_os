@@ -173,7 +173,7 @@ void Gui::MainWindow::uart_connect()
 
 void Gui::MainWindow::call_error(const QString &err)
 {
-	add_new_event("Failed to olaf_call: ", Gui::ERROR);
+	add_new_event("Failed to olaf_call: " + err, Gui::ERROR);
 }
 
 void Gui::MainWindow::device_not_responding(const QString &name)

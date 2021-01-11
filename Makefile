@@ -2,7 +2,7 @@
 
 include Makefile.variables
 
-SUBDIRS = apps console libs modules packages
+SUBDIRS = packages apps console libs modules
 
 BUILD_DIR=$(O)/build
 

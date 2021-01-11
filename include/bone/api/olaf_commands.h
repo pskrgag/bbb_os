@@ -4,7 +4,9 @@
 #include <stddef.h>
 
 /* for structures */
+#ifndef __packed
 #define __packed		__attribute__((packed))
+#endif
 
 /* code type */
 typedef uint64_t olaf_code_t;
