@@ -1,0 +1,75 @@
+diff --git a/arch/arm/boot/dts/am335x-boneblack-test.dtsi b/arch/arm/boot/dts/am335x-boneblack-test.dtsi
+new file mode 100644
+index 000000000000..70f4a95fa36b
+--- /dev/null
++++ b/arch/arm/boot/dts/am335x-boneblack-test.dtsi
+@@ -0,0 +1,31 @@
++/* test dts */
++
++/ {
++	pcdev-1 {
++		compatible = "test-A1x";
++		pskrgag,size = <512>;
++		pskrgag,serial = "TEST1111";
++		pskrgag,perm = <0x11>;
++	};
++
++	pcdev-2 {
++		compatible = "test-B1x";
++		pskrgag,size = <1024>;
++		pskrgag,serial = "TEST2222";
++		pskrgag,perm = <0x11>;
++	};
++
++	pcdev-3 {
++		compatible = "test-C1x";
++		pskrgag,size = <256>;
++		pskrgag,serial = "TEST3333";
++		pskrgag,perm = <0x11>;
++	};
++
++	pcdev-4 {
++		compatible = "test-D1x";
++		pskrgag,size = <128>;
++		pskrgag,serial = "TEST4444";
++		pskrgag,perm = <0x11>;
++	};
++};
+\ No newline at end of file
+diff --git a/arch/arm/boot/dts/am335x-boneblack.dts b/arch/arm/boot/dts/am335x-boneblack.dts
+index 40b17b956109..ff7e67a2b9b8 100644
+--- a/arch/arm/boot/dts/am335x-boneblack.dts
++++ b/arch/arm/boot/dts/am335x-boneblack.dts
+@@ -7,6 +7,7 @@
+ #include "am33xx.dtsi"
+ #include "am335x-bone-common.dtsi"
+ #include "am335x-boneblack-common.dtsi"
++#include "am335x-boneblack-test.dtsi"
+ /* #include "am335x-bone-jtag.dtsi" */
+ 
+ / {
+diff --git a/scripts/setlocalversion b/scripts/setlocalversion
+index a2998b118ef9..e6b8a13af073 100755
+--- a/scripts/setlocalversion
++++ b/scripts/setlocalversion
+@@ -169,15 +169,15 @@ res="${res}${CONFIG_LOCALVERSION}${LOCALVERSION}"
+ if test "$CONFIG_LOCALVERSION_AUTO" = "y"; then
+ 	# full scm version string
+ 	res="$res$(scm_version)"
+-else
++# else
+ 	# append a plus sign if the repository is not in a clean
+ 	# annotated or signed tagged state (as git describe only
+ 	# looks at signed or annotated tags - git tag -a/-s) and
+ 	# LOCALVERSION= is not specified
+-	if test "${LOCALVERSION+set}" != "set"; then
+-		scm=$(scm_version --short)
+-		res="$res${scm:++}"
+-	fi
++	# if test "${LOCALVERSION+set}" != "set"; then
++	# 	scm=$(scm_version --short)
++	# 	res="$res${scm:++}"
++	# fi
+ fi
+ 
+ echo "$res"

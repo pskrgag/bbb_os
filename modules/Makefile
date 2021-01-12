@@ -8,7 +8,8 @@ MODULES_DIR = $(BUILD_DIR)/modules
 LINUX_SOURCE_DIR = $(PACKAGES_DIR)/linux/
 
 model-y := main/main_module.o main/node.o main/system.o
-obj-m := model.o
+hardware-y := hardware/pd_driver_dt.o
+obj-m := model.o hardware.o
 
 EXTRA_CFLAGS = -I $(PWD)/include
 

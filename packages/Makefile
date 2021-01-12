@@ -18,8 +18,9 @@ link: $(ROOTFS_DIR) root initramfs main_image clean
 BUSYBOX = busybox-1.32.1
 GLIBC = glibc-2.26
 DROPBEAR = dropbear-2020.80
+LINUX = linux-5.4
 
-LINUX_URL = https://github.com/beagleboard/linux/archive/4.14.zip
+LINUX_URL = https://github.com/beagleboard/linux.git
 BUSYBOX_USL = https://www.busybox.net/downloads/$(BUSYBOX).tar.bz2
 GLIBC_URL = http://ftp.gnu.org/gnu/libc/$(GLIBC).tar.xz
 DROPBEAR_URL = https://matt.ucc.asn.au/dropbear/$(DROPBEAR).tar.bz2
@@ -30,6 +31,12 @@ glibc: $(LOGS_DIR)/$(GLIBC).d
 dropbear: $(LOGS_DIR)/$(DROPBEAR).d
 
 $(LOGS_DIR)/linux.d: $(PACKAGES_DIR)/linux
+	$(MAKE) -C $(PACKAGES_DIR)/linux distclean
+
+	@cp $(LINUX).config $(PACKAGES_DIR)/linux/.config
+
+	@patch -p1 -d $< < $(LINUX).patch > /dev/null 2>&1
+
 	$(MAKE) -C $(PACKAGES_DIR)/linux					\
 	ARCH=$(ARCH)								\
 	CROSS_COMPILE=$(TARGET)-						\
@@ -42,13 +49,8 @@ $(LOGS_DIR)/linux.d: $(PACKAGES_DIR)/linux
 
 $(PACKAGES_DIR)/linux:
 	@echo "Building linux..."
-	@git -q -C $(PACKAGES_DIR) clone https://github.com/beagleboard/linux.git
-	@git --git-dir $@ checkout 5.4
-	@cp linux.config $(PACKAGES_DIR)/linux/.config
-#	@wget -q $(LINUX_URL) -O $(PACKAGES_DIR)/linux.zip
-#	@unzip $(PACKAGES_DIR)/linux.zip -d $(PACKAGES_DIR) > /dev/null 2>&1
-#	@mv $(PACKAGES_DIR)/linux-4.14 $(PACKAGES_DIR)/linux
-#	@cp linux.config $(PACKAGES_DIR)/linux/.config
+	@git -q -C $(PACKAGES_DIR) clone $(LINUX_URL)
+	@git --git-dir $@ checkout $(patsubst linux-%, %, $(LINUX))
 
 # busybox
 
@@ -111,7 +113,7 @@ $(LOGS_DIR)/$(DROPBEAR).d: | $(PACKAGES_DIR)/$(DROPBEAR)
 	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1
 
 	$(MAKE) -C $(PACKAGES_DIR)/$(DROPBEAR)					\
-	PROGRAMS="dropbear" -j10						\
+	PROGRAMS="dropbear scp" -j10						\
 	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1;
 
 $(PACKAGES_DIR)/$(DROPBEAR):
@@ -177,7 +179,7 @@ $(ROOTFS_DIR):
 	>> $(LOGS_DIR)/$(GLIBC).d 2>&1;						\
 
 	$(MAKE) -C $(PACKAGES_DIR)/$(DROPBEAR)					\
-	PROGRAMS="dropbear" install						\
+	PROGRAMS="dropbear scp" install						\
 	>> $(LOGS_DIR)/$(DROPBEAR).d 2>&1;
 
 $(PACKAGES_DIR):
