@@ -6,6 +6,7 @@
 #include <linux/slab.h>
 #include <linux/fs.h>
 #include <linux/of.h>
+#include <linux/of_device.h>
 
 #include "bone/pd.h"
 
@@ -53,26 +54,28 @@ static struct driver_private_data driver_private_data = {
 	.total_devices = 2,
 };
 
+static struct of_device_id test_ids[] = {
+	{
+		.compatible = "test-A1x",
+		.data = (void *) 0,
+	}, {
+		.compatible = "test-B1x",
+		.data = (void *) 1,
+	}, {
+		.compatible = "test-C1x",
+		.data = (void *) 2,
+	}, {
+		.compatible = "test-D1x",
+		.data = (void *) 2,
+	}, __END_OF_LIST
+};
+
 static struct platform_driver test_driver = {
 	.probe = test_probe,
 	.remove = test_remove,
 	.driver = {
 		.name = "test",
-		.of_match_table = (const struct of_device_id []) {
-		{
-			.compatible = "test-A1x",
-			.data = (void *) 0,
-		}, {
-			.compatible = "test-B1x",
-			.data = (void *) 1,
-		}, {
-			.compatible = "test-C1x",
-			.data = (void *) 2,
-		}, {
-			.compatible = "test-D1x",
-			.data = (void *) 2,
-		}, __END_OF_LIST
-	},
+		.of_match_table = (const struct of_device_id *) of_match_ptr(&test_ids),
 	},
 };
 
@@ -106,7 +109,11 @@ static struct platform_data *get_data_from_dt(struct device *dev)
 		return ERR_PTR(-EINVAL);
 	}
 
-
+	res = of_property_read_u32_index(dev->of_node, "pskrgag,perm", 0, &data->perm);
+	if (res) {
+		dev_info(dev, "EINVAL LOL 2");
+		return ERR_PTR(-EINVAL);
+	}
 
 	return data;
 }
@@ -114,20 +121,31 @@ static struct platform_data *get_data_from_dt(struct device *dev)
 static int test_probe(struct platform_device *pd)
 {
 	struct device_private_data *dev_priv_data;
-	struct platform_data *dev_data = dev_get_platdata(&pd->dev);
+	struct platform_data *dev_data = get_data_from_dt(&pd->dev);
 	int res;
 	struct device *device;
+	int driver_data;
+	int id;
 
-	pr_err("Probe dummy shit = %d %d\n", dummy_conf[pd->id_entry->driver_data].config_item1,
-					     dummy_conf[pd->id_entry->driver_data].config_item2);
+	if (IS_ERR(dev_data)) {
+		pr_err("Can't find device data\n");
+		return -1;
+	}
 
 	if (!dev_data) {
-		dev_data = get_data_from_dt(&pd->dev);
-		if (!dev_data) {
-			pr_err("Can't find device data\n");
+		dev_data = dev_get_platdata(&pd->dev);
+		if (!dev_data)
 			return -1;
-		}
+		
+		driver_data = pd->id_entry->driver_data;
+	} else {
+		driver_data = (int) of_device_get_match_data(&pd->dev);
 	}
+
+	id = dev_data->serial_number[strlen(dev_data->serial_number) - 1] - '0';
+
+	dev_info(&pd->dev, "Serial = %s\n", dev_data->serial_number);
+	dev_info(&pd->dev, "Size = %zu\n", dev_data->size);
 
 	dev_priv_data = devm_kmalloc(&pd->dev, sizeof(*dev_priv_data), GFP_KERNEL);
 	if (!dev_priv_data) {
@@ -153,8 +171,9 @@ static int test_probe(struct platform_device *pd)
 		return -EINVAL;
 	}
 
-	device = device_create(driver_private_data.class, NULL, dev_priv_data->dev_num,
-			       NULL, "test-%d", pd->id);
+	device = device_create(driver_private_data.class, &pd->dev,
+			       driver_private_data.base_number + id,
+			       NULL, "test-%d", id);
 	if (IS_ERR(device)) {
 		pr_err("Failed to create device file\n");
 		res = -EINVAL;
@@ -163,25 +182,21 @@ static int test_probe(struct platform_device *pd)
 
 	pd->dev.driver_data = dev_priv_data;
 
-	pr_err("Probe is completed\n");
+	dev_err(&pd->dev, "Probe is completed\n");
 	return 0;
 
 dev_err:
 	cdev_del(&dev_priv_data->cdev);
 	return res;
-
-	pr_err("Device detected\n");
-	return 0;
 }
 
 static int test_remove(struct platform_device *pd)
 {
-#if 0
 	struct device_private_data *dev_priv_data = pd->dev.driver_data;
 
 	device_destroy(driver_private_data.class, dev_priv_data->dev_num);
 	cdev_del(&dev_priv_data->cdev);
-#endif
+
 	pr_err("Remove is completed\n");
 	return 0;
 }

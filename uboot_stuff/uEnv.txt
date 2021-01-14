@@ -1,8 +1,11 @@
 console=ttyO0,115200n8
 serverip=192.168.7.1
 ipaddr=192.168.7.2
+fdtaddr=0x88000000
+fdtovaddr=0x88c00000
 fullpath=/var/lib/tftpboot/
-loadtftp=echo =============== Booting from tftp lol ===============;tftpboot 0x82000000 uImage;tftpboot 0x88000000 am335x-boneblack.dtb
+loadtftp=echo =============== Booting from tftp lol ===============;tftpboot 0x82000000 uImage;tftpboot ${fdtaddr} am335x-boneblack.dtb;tftpboot ${fdtovaddr} overlay.dtbo
 setbootargs=setenv bootargs console=${console} root=/dev/mmcblk0p2 rw rng_core.default_quality=1000
-uenvcmd=run loadtftp;run setbootargs;bootm 0x82000000 - 0x88000000
+ftd_over=fdt addr $fdtaddr; fdt resize 1000; fdt apply ${fdtovaddr}
+uenvcmd=run loadtftp;run ftd_over;run setbootargs;bootm 0x82000000 - ${fdtaddr}
 bootcmd=run uenvcmd

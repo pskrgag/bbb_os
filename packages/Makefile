@@ -9,11 +9,12 @@ HOST = i686-pc-linux-gnu
 LOADADDR = 0x82000000
 
 IMAGE_NAME = image.img
+DTB_FILE = overlay.dtbo
 
 compile: $(LOGS_DIR) $(PACKAGES_DIR) $(PACKAGES)
 link: $(ROOTFS_DIR) root initramfs main_image clean
 
-.PHONY: root initramfs main_image $(ROOTFS_DIR)
+.PHONY: root initramfs main_image $(ROOTFS_DIR) dtb
 
 BUSYBOX = busybox-1.32.1
 GLIBC = glibc-2.26
@@ -25,13 +26,16 @@ BUSYBOX_USL = https://www.busybox.net/downloads/$(BUSYBOX).tar.bz2
 GLIBC_URL = http://ftp.gnu.org/gnu/libc/$(GLIBC).tar.xz
 DROPBEAR_URL = https://matt.ucc.asn.au/dropbear/$(DROPBEAR).tar.bz2
 
-linux: $(LOGS_DIR)/linux.d
+linux: $(LOGS_DIR)/linux.d $(PACKAGES_DIR)/$(DTB_FILE)
 busybox: $(LOGS_DIR)/$(BUSYBOX).d
 glibc: $(LOGS_DIR)/$(GLIBC).d
 dropbear: $(LOGS_DIR)/$(DROPBEAR).d
 
-$(LOGS_DIR)/linux.d: $(PACKAGES_DIR)/linux
-	$(MAKE) -C $(PACKAGES_DIR)/linux distclean
+# linux kernel
+
+$(LOGS_DIR)/linux.d: $(PWD)/packages/$(LINUX).patch | $(PACKAGES_DIR)/linux
+	@git -C $< stash --quiet
+	@git -C $< clean -f --quiet
 
 	@cp $(LINUX).config $(PACKAGES_DIR)/linux/.config
 
@@ -45,12 +49,15 @@ $(LOGS_DIR)/linux.d: $(PACKAGES_DIR)/linux
 	LOADADDR=$(LOADADDR)							\
 	-j10 >> $(LOGS_DIR)/linux.d 2>&1
 
-# linux kernel
-
 $(PACKAGES_DIR)/linux:
 	@echo "Building linux..."
 	@git -q -C $(PACKAGES_DIR) clone $(LINUX_URL)
-	@git --git-dir $@ checkout $(patsubst linux-%, %, $(LINUX))
+	@git -C $@ checkout $(patsubst linux-%, %, $(LINUX))
+
+$(PACKAGES_DIR)/$(DTB_FILE): $(PWD)/packages/$(LINUX).overlay.dts
+	@dtc -@ -O dtb								\
+	-o $(PACKAGES_DIR)/$(DTB_FILE)						\
+	$(PWD)/packages/$(LINUX).overlay.dts
 
 # busybox
 
